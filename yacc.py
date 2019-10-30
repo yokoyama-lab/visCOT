@@ -109,5 +109,4 @@ if __name__ == '__main__':
             break
         print(parser.parse(s).show())
         print(parser.parse(s).draw())
-        print(parser.parse(s). return_detail())
         flow.show_matplotlib()
