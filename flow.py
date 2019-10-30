@@ -59,6 +59,9 @@ def draw_arrow(center,theta=0):
 def draw_point(center):
     plt.plot([center[0]], [center[1]],'k.')
 
+def show_matplotlib():
+    plt.show()
+
 class Node(object, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __init__(self):
@@ -69,26 +72,26 @@ class Node(object, metaclass=abc.ABCMeta):
 
     def draw(self,center=(0,0)):#描画する際に親から与える中心点
         pass
-    
+
     def return_detail(self):#この図形の専有領域の半径を返す
         pass
-    
+
    # def parse(self):            # PLYでparseを作成するのではなく，このメソッドを実装してparserを作っても良い．
     #    pass
 
 class A0(Node):
     def __init__(self,head):    #子の半径を定義
-        self.head = head        #抽象構文木の作成        
+        self.head = head        #抽象構文木の作成
         self.r = head.r + 1
 
-    
+
     def draw(self,center=(0,0)):#描画する際に親から与える中心点
         self.head.draw()
         #return center#子に与える中心点
-    
+
     def show(self):
-        return "a0("+ self.head.show() +")" 
-    
+        return "a0("+ self.head.show() +")"
+
     def return_detail(self):#この図形の専有領域の半径を返す
         return self.r
 
@@ -96,7 +99,7 @@ class B0_plus(Node):
     def __init__(self, head, tail):
         self.head = head
         self.tail = tail
-        
+
     def show(self):
         return "b0+("+ self.head.show() +"," + self.tail.show() +")"
 
@@ -112,18 +115,18 @@ class A_plus(Node):
     def __init__(self, head):
         self.head = head
         self.r = head.r + 1
-        
+
     def show(self):
         return "a+(" + self.head.show() + ")"
-    
+
     def draw(self,center=(0,0)):#描画する際に親から与える中心点
         draw_circle(self.r ,center)
         self.head.draw()
-        
+
     def return_detail(self):#この図形の専有領域の半径を返す
         self.r
-    
-    
+
+
 class A_minus(Node):
     def __init__(self, head):
         self.head = head
@@ -139,74 +142,74 @@ class A2(Node):
 
     def show(self):
         return "a2(" + self.head.show() + ',' + self.tail.show() + ")"
-    
+
 class Cons(Node):
     def __init__(self, head, tail):
         self.head = head
         self.tail = tail
-        self.r_1 = head.r 
-        self.r_2 = tail.r 
+        self.r_1 = head.r
+        self.r_2 = tail.r
         self.r= self.r_1 + self.r_2
-    
+
     def show(self):
         return "cons(" + self.head.show() + ", " + self.tail.show() + ")"
- 
+
     def draw(self,center=(0,0)):#描画する際に親から与える中心点
         #draw_circle(self.r_1 + 1, (center[0], self.r_2 + 1 + center[1]))
         #draw_circle(self.r_2 + 1, (center[0], -self.r_1 + 1 + center[1]))
         self.head.draw()
         self.tail.draw()
-        
+
     def return_detail(self):#この図形の専有領域の半径を返す
         self.r
-        
+
 class Nil(Node):
     def __init__(self):
         self.r = 0
 
     def show(self):
         return "n"
-    
+
     def draw(self,center=(0,0)):
         pass
-    
+
     def return_detail(self):
         pass
-    
+
 class Leaf(Node):
     def __init__(self):
         self.r = 0
-    
+
     def show(self):
         return "l"
 
     def draw(self,center=(0,0)):
         pass
-    
+
     def return_detail(self):
         pass
-    
+
 class B_plus_plus(Node):
     def __init__(self, head ,tail):
-        self.head = head 
+        self.head = head
         self.tail = tail
         self.r_1 = head.r + 1 #上の図の占有領域(半径)
         self.r_2 = tail.r + 1 # 下の図の占有領域(半径)
         self.r = self.r_1 + self.r_2 #全体の占有領域(半径)
 
-        
+
     def show(self):
         return "b++(" + self.head.show() + ',' + self.tail.show() + ")"
-    
+
     def draw(self,center=(0,0)):#描画する際に親から与える中心点
         draw_circle(self.r_1 , (center[0], self.r_2 + center[1]))
         draw_circle(self.r_2 , (center[0], -self.r_1 + center[1]))
         self.head.draw((center[0], self.r_2 + center[1]))
         self.tail.draw((center[0], -self.r_1 + center[1]))
-        
+
     def return_detail(self):#この図形の専有領域の半径を返す
         self.r
-    
+
 class B_plus_minus(Node):
     def __init__(self, head ,tail):
         self.head = head
@@ -217,24 +220,24 @@ class B_plus_minus(Node):
 
     def show(self):
         return "b+-(" + self.head.show() + ',' + self.tail.show() + ")"
-    
+
     def draw(self,center=(0,0)):#描画する際に親から与える中心点
         draw_circle(self.r_1 , (center[0], self.r_2 + center[1]))
         draw_circle(self.r_2 + self.r_1 , (center[0],center[1]))
         self.head.draw((center[0], self.r_2 + 1 + center[1]))
         self.tail.draw((center[0],center[1]- self.r_1))
-        
+
     def return_detail(self):#この図形の専有領域の半径を返す
         self.r
-    
-    
+
+
 class Beta_plus(Node):
     """def __init__(self, head):
         self.head = head """
-        
+
     def show(self):
         return "be+(" + self.head.show() +  ")"
-    
+
     def __init__(self,head,children_list=([(0,0)])):
         #children_listはそれぞれの子供Cの(高さ,下辺長)
         self.head = head
@@ -244,7 +247,7 @@ class Beta_plus(Node):
         self.high_children=0
         self.children_length=0
         self.longest_children=0
-        
+
         for i in range(0,self.children_list_count):
             child=self.children_list[i]
             self.children_length=self.children_length+child[1]+self.margin#両脇にマージンを作成
@@ -271,10 +274,10 @@ class Beta_plus(Node):
 
     def return_detail(self):
         return self.r
-    
+
 class B_minus_minus(Node):
     def __init__(self, head ,tail):
-        self.head = head 
+        self.head = head
         self.tail = tail
         self.r_1 = head.r + 2 #上の図の占有領域
         self.r_2 = tail.r + 2 # 下の図の占有領域
@@ -282,16 +285,16 @@ class B_minus_minus(Node):
 
     def show(self):
         return "b--(" + self.head.show() + ',' + self.tail.show() + ")"
-    
+
     def draw(self,center=(0,0)):#描画する際に親から与える中心点
         draw_circle(self.r_1 , (center[0], self.r_2  + center[1]))
         draw_circle(self.r_2 , (center[0], -self.r_1  + center[1]))
         self.head.draw((center[0], self.r_2 + center[1]))
         self.tail.draw((center[0], -self.r_1  + center[1]))
-        
+
     def return_detail(self):#この図形の専有領域の半径を返す
         self.r
-    
+
 class B_minus_plus(Node):
     def __init__(self, head ,tail):
         self.head = head
@@ -302,31 +305,31 @@ class B_minus_plus(Node):
 
     def show(self):
         return "b-+(" + self.head.show() + ',' + self.tail.show() + ")"
-    
+
     def draw(self,center=(0,0)):#描画する際に親から与える中心点
         draw_circle(self.r_1 , (center[0], self.r_2 + center[1]))
         draw_circle(self.r_1+ self.r_2 , (center[0],center[1]))
         self.head.draw((center[0], self.r_2 + center[1]))
         self.tail.draw((center[0],center[1]- self.r_1))
-        
+
     def return_detail(self):#この図形の専有領域の半径を返す
         self.r
-        
+
 class Beta_minus(Node):
     def __init__(self, head):
         self.head = head
 
     def show(self):
         return "be-(" + self.head.show() + ")"
-    
+
 class C_plus(Node):
     """def __init__(self, head ,tail):
         self.head = head
         self.tail = tail """
-   
+
     def show(self):
-        return "c+(" + self.head.show() + ',' + self.tail.show() + ")" 
-    
+        return "c+(" + self.head.show() + ',' + self.tail.show() + ")"
+
     def __init__(self,head,tail,b_r=0,children_list=([(0,0)])):
         self.head = head
         self.tail = tail
@@ -398,8 +401,8 @@ class C_minus(Node):
 
     def show(self):
         return "c-(" + self.head.show() + ',' + self.tail.show() + ")"
-    
+
 
 
 #   a0(cons(a+(b++(b++(l,l),l)),n))
-#   
+#
