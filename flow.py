@@ -225,7 +225,10 @@ class Cons(Node):
     def draw(self,children_list):
         print(children_list)
         if(len(children_list)!=0):
-            self.head.draw(children_list.pop(0))
+            if(isinstance(children_list,tuple)):
+                self.head.draw(children_list)
+            else:
+                self.head.draw(children_list.pop(0))
             if(len(children_list)>=1):
                 self.tail.draw(children_list)
             else:
