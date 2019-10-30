@@ -107,6 +107,7 @@ if __name__ == '__main__':
             s = input('>>> ')
         except EOFError:
             break
-        print(parser.parse(s).show())
+        #print(parser.parse(s).show())
         print(parser.parse(s).draw())
         flow.show_matplotlib()
+        break

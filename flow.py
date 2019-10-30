@@ -15,6 +15,7 @@ plt.axis('off')
 ax.set_aspect('equal')
 
 def show_matplotlib():
+    print("draw successful!")
     plt.show()
 
 #スプライン補間
@@ -70,7 +71,7 @@ class Node(object, metaclass=abc.ABCMeta):
     def show(self):
         pass
 
-    def draw(self,center=(0,0)):#描画する際に親から与える中心点
+    def draw(self):#描画する際に親から与える中心点
         pass
 
     def return_detail(self):#この図形の専有領域の半径を返す
@@ -82,9 +83,12 @@ class Node(object, metaclass=abc.ABCMeta):
 class A0(Node):
     def __init__(self,head):    #子の半径を定義
         self.head = head        #抽象構文木の作成
+        print("A0 was made!")
 
-    def draw(self,center=[(0,0)]):#描画する際に親から与える中心点
-        self.head.draw(center)
+    def draw(self):#描画する際に親から与える中心点
+        children_list=[(0,0)]
+        self.head.draw(children_list)
+        print("A0 was drawn.")
         #return center#子に与える中心点
 
     def show(self):
@@ -113,6 +117,7 @@ class A_plus(Node):
         self.r = head.r + self.margin
         self.bool_child = True
         self.child = [self.r]
+        print("A_plus was made!")
 
     def show(self):
         return "a+(" + self.head.show() + ")"
@@ -121,7 +126,12 @@ class A_plus(Node):
         draw_circle(self.r ,center)
         draw_arrow((center[0]-self.r,center[1]),theta=math.radians(270))
         draw_arrow((center[0]+self.r,center[1]),theta=math.radians(90))
+        print("plot A_plus.")
         self.head.draw(center)
+
+
+    def return_detail(self):#この図形の専有領域の半径を返す
+        return self.r
 
 class A_minus(Node):
     def __init__(self, head):
@@ -130,6 +140,9 @@ class A_minus(Node):
 
     def show(self):
         return "a-(" + self.head.show() + ")"
+
+    def return_detail(self):#この図形の専有領域の半径を返す
+        return self.r
 
 class A2(Node):
     def __init__(self, head ,tail):
@@ -142,47 +155,58 @@ class A2(Node):
     def draw(self,center):
         pass
 
+    def return_detail(self):
+        return self.r
+
 class Cons(Node):
     def __init__(self, head, tail):
         self.head = head
         self.tail = tail
+        self.head_child=[s for s in head.child if s != (0,0)]
+        self.tail_child=[s for s in tail.child if s != (0,0)]
         self.child = []
-        if(head.bool_child==True or tail.bool_child==True):
-            if(head.bool_child==True):
-                self.child.extend(head.child)
-            if(tail.bool_child==True):
-                self.child.extend(tail.child)
+        self.bool_child=True
+        if (len(head.child)!=0):
+            for i in range(0,len(self.head_child)):
+                self.child.append(self.head_child[i])
+        if (len(tail.child)!=0):
+            for i in range(0,len(self.tail_child)):
+                self.child.append(self.tail_child[i])
+        print("Cons was made!",self.child)
 
     def show(self):
         return "cons(" + self.head.show() + ", " + self.tail.show() + ")"
 
     def draw(self,children_list):
-        self.head.draw(children_list.pop(0))
-        if(len(children_list)!=1):
-            self.tail.draw(children_list)
-        else:
-            self.tail.draw(children_list.pop(0))
+        print(children_list)
+        if(len(children_list)!=0):
+            self.head.draw(children_list.pop(0))
+            if(len(children_list)>=1):
+                self.tail.draw(children_list)
+            else:
+                self.tail.draw((0,0))
+        print("plot Cons.")
 
 class Nil(Node):
     def __init__(self):
-        self.bool_child=False
-        self.r=0
+        self.child=([(0,0)])
+        print("Nil was made!")
 
     def show(self):
         return "n"
 
-    def draw(self,center=(0,0)):
+    def draw(self,center):
         pass
 
 class Leaf(Node):
     def __init__(self):
-        self.bool_child=False
-        self.r = 0
+        self.r=0
+        print("Leaf was made!")
 
     def show(self):
         return "l"
 
-    def draw(self,center=(0,0)):
+    def draw(self,center):
         pass
 
 class B_plus_plus(Node):
@@ -194,7 +218,7 @@ class B_plus_plus(Node):
         self.l_up_r = head.r #上の図の占有領域(半径)
         self.l_down_r = tail.r # 下の図の占有領域(半径)
         self.r = (2*self.l_up_r + 2*self.l_down_r + 4*self.margin) / 2 #全体の占有領域(半径)
-
+        print("B_plus_plus was made!")
 
     def show(self):
         return "b++(" + self.head.show() + ',' + self.tail.show() + ")"
@@ -207,6 +231,9 @@ class B_plus_plus(Node):
         draw_arrow((center[0],-self.l_up_r-2*self.margin+center[1]-self.l_down_r),math.radians(180))#下の円の矢印
         self.head.draw((center[0],self.l_down_r+self.margin+center[1]))
         self.tail.draw((center[0],-self.l_up_r-self.margin+center[1]))
+
+    def return_detail(self):
+        return self.r
 
 class B_plus_minus(Node):
     def __init__(self, head ,tail):
@@ -225,42 +252,12 @@ class B_plus_minus(Node):
         self.head.draw((center[0], self.r_2 + 1 + center[1]))
         self.tail.draw((center[0],center[1]- self.r_1))
 
-class B_minus_minus(Node):
-    def __init__(self, head ,tail):
-        self.head = head
-        self.tail = tail
-        self.r_1 = head.r + 2 #上の図の占有領域
-        self.r_2 = tail.r + 2 # 下の図の占有領域
-        self.r = self.r_1 + self.r_2 #全体の占有領域
-
-    def show(self):
-        return "b--(" + self.head.show() + ',' + self.tail.show() + ")"
-
-    def draw(self,center=(0,0)):#描画する際に親から与える中心点
-        draw_circle(self.r_1 , (center[0], self.r_2  + center[1]))
-        draw_circle(self.r_2 , (center[0], -self.r_1  + center[1]))
-        self.head.draw((center[0], self.r_2 + center[1]))
-        self.tail.draw((center[0], -self.r_1  + center[1]))
-
-class B_minus_plus(Node):
-    def __init__(self, head ,tail):
-        self.head = head
-        self.tail = tail
-        self.r_1 = head.r + tail.r + 2#外の図の占有領域
-        self.r_2 = tail.r + 1 # 中の図の占有領域
-        self.r = self.r_1 + self.r_2 #全体の占有領域
-
-    def show(self):
-        return "b-+(" + self.head.show() + ',' + self.tail.show() + ")"
-
-    def draw(self,center=(0,0)):#描画する際に親から与える中心点
-        draw_circle(self.r_1 , (center[0], self.r_2 + center[1]))
-        draw_circle(self.r_1+ self.r_2 , (center[0],center[1]))
-        self.head.draw((center[0], self.r_2 + center[1]))
-        self.tail.draw((center[0],center[1]- self.r_1))
+    def return_detail(self):
+        return self.r
 
 class Beta_plus(Node):
     def __init__(self,head):
+        print("making Beta_plus...")
         self.head = head
         self.margin=0.5#要素の両脇に作るスペースの大きさ
         self.children_list=head.child
@@ -279,6 +276,7 @@ class Beta_plus(Node):
             self.children_length=self.longest_children*2#betaとC系が重ならないように180度を超えないように
         self.center_r=(self.children_length)/(2*math.pi)#betaの円
         self.r=self.center_r+self.high_children#親に渡す全体の大きさ
+        print("Beta_plus was made!")
 
     def show(self):
         return "be+(" + self.head.show() +  ")"
@@ -292,7 +290,51 @@ class Beta_plus(Node):
             for_children.append([length,self.center_r,center])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
             child=self.children_list[i]
             length=length+child[1]
+        print("plot Beta_plus.")
         self.head.draw(for_children)
+
+    def return_detail(self):
+        return self.r
+
+class B_minus_minus(Node):
+    def __init__(self, head ,tail):
+        self.head = head
+        self.tail = tail
+        self.r_1 = head.r + 2 #上の図の占有領域
+        self.r_2 = tail.r + 2 # 下の図の占有領域
+        self.r = self.r_1 + self.r_2 #全体の占有領域
+
+    def show(self):
+        return "b--(" + self.head.show() + ',' + self.tail.show() + ")"
+
+    def draw(self,center=(0,0)):#描画する際に親から与える中心点
+        draw_circle(self.r_1 , (center[0], self.r_2  + center[1]))
+        draw_circle(self.r_2 , (center[0], -self.r_1  + center[1]))
+        self.head.draw((center[0], self.r_2 + center[1]))
+        self.tail.draw((center[0], -self.r_1  + center[1]))
+
+    def return_detail(self):
+        return self.r
+
+class B_minus_plus(Node):
+    def __init__(self, head ,tail):
+        self.head = head
+        self.tail = tail
+        self.r_1 = head.r + tail.r + 2#外の図の占有領域
+        self.r_2 = tail.r + 1 # 中の図の占有領域
+        self.r = self.r_1 + self.r_2 #全体の占有領域
+
+    def show(self):
+        return "b-+(" + self.head.show() + ',' + self.tail.show() + ")"
+
+    def draw(self,center=(0,0)):#描画する際に親から与える中心点
+        draw_circle(self.r_1 , (center[0], self.r_2 + center[1]))
+        draw_circle(self.r_1+ self.r_2 , (center[0],center[1]))
+        self.head.draw((center[0], self.r_2 + center[1]))
+        self.tail.draw((center[0],center[1]- self.r_1))
+
+    def return_detail(self):
+        return self.r
 
 class Beta_minus(Node):
     def __init__(self, head):
@@ -307,8 +349,8 @@ class C_plus(Node):
         self.tail = tail
         self.margin=1#c系の要素の両脇に作るスペースの大きさ
         self.circ_margin=0.5#子のb系の要素と親の間の距離
-        self.b_r = head.r
         self.children_list=tail.child
+        self.b_r = head.r
         self.children_list_count=len(self.children_list)
         self.high_children=0
         self.children_length=0
@@ -324,9 +366,81 @@ class C_plus(Node):
         else:
             self.bottom_length=self.children_length
         self.high=(2*self.b_r)+self.high_children+self.margin
+        self.bool_child=True
+        self.child=[(self.high,self.bottom_length)]
+        print("C_plus was made!")
 
     def show(self):
         return "c+(" + self.head.show() + ',' + self.tail.show() + ")"
+
+    def draw(self,children_list):
+        self.length=children_list[0]
+        self.center_r=children_list[1]
+        self.center=children_list[2]
+        self.start_theta=self.length/self.center_r
+        self.start_point=((self.center_r*math.cos(self.start_theta))+self.center[0],(self.center_r*math.sin(self.start_theta))+self.center[1])
+        self.end_theta=(self.length+self.children_length)/self.center_r
+        self.end_point=((self.center_r*math.cos(self.end_theta))+self.center[0],(self.center_r*math.sin(self.end_theta))+self.center[1])
+        self.high_theta=((self.end_theta-self.start_theta)/2)+self.start_theta
+        self.high_point=(((self.center_r+self.high)*math.cos(self.high_theta))+self.center[0],((self.center_r+self.high)*math.sin(self.high_theta))+self.center[1])
+        self.b_center=((self.center_r+self.high_children+self.circ_margin+self.b_r)*math.cos(self.high_theta)+self.center[0],(self.center_r+self.high_children+self.circ_margin+self.b_r)*math.sin(self.high_theta)+self.center[1])
+        self.b_r_theta=math.pi-((math.pi/2)+self.high_theta)#180-(90+high_theta)bの専有領域の中心を基準に三角関数を適用するための準備
+        self.b_r_center=(((self.b_r+self.circ_margin)*(math.cos(-self.b_r_theta)))+self.b_center[0],((self.b_r+self.circ_margin)*(math.sin(-self.b_r_theta))+self.b_center[1]))#0度の点
+        self.b_l_center=(((self.b_r+self.circ_margin)*(math.cos(math.pi-self.b_r_theta)))+self.b_center[0],((self.b_r+self.circ_margin)*(math.sin(math.pi-self.b_r_theta))+self.b_center[1]))#180度の点
+        self.b_rr_center=(((self.b_r+self.circ_margin)*(math.cos(-self.b_r_theta-(math.pi/6))))+self.b_center[0],((self.b_r+self.circ_margin)*(math.sin(-self.b_r_theta-(math.pi/6)))+self.b_center[1]))#-30度の点
+        self.b_ll_center=(((self.b_r+self.circ_margin)*(math.cos(math.pi-self.b_r_theta+(math.pi/6))))+self.b_center[0],((self.b_r+self.circ_margin)*(math.sin(math.pi-self.b_r_theta+(math.pi/6)))+self.b_center[1]))#210度の点
+        if(self.b_r!=0):
+            draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
+        else:
+            draw_spline([self.start_point,self.high_point,self.end_point])
+        draw_point(self.start_point)
+        draw_point(self.end_point)
+        draw_arrow(self.high_point,self.high_theta+math.radians(90))
+        for_children=[]
+        plus_length=self.length
+        for i in range(0,self.children_list_count):
+            plus_length=plus_length+self.margin/2
+            for_children.append([plus_length,self.center_r,self.center])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
+            child=self.children_list[i]
+            plus_length=plus_length+child[1]
+        print("plot C_plus.")
+        self.head.draw(self.b_center)
+        self.tail.draw(for_children)
+
+
+    def return_detail(self):
+        return [self.high,self.bottom_length]
+
+
+class C_minus(Node):
+    def __init__(self, head ,tail):
+        self.head = head
+        self.tail = tail
+        self.margin=1#c系の要素の両脇に作るスペースの大きさ
+        self.circ_margin=0.5#子のb系の要素と親の間の距離
+        self.children_list=tail.child
+        self.b_r = head.r
+        self.children_list_count=len(self.children_list)
+        self.high_children=0
+        self.children_length=0
+        self.high=0
+        self.bottom_length=0
+        for i in range(0,self.children_list_count):
+            child=self.children_list[i]
+            self.children_length=self.children_length+child[1]+self.margin
+            if(self.high_children<child[0]):
+                self.high_children=child[0]
+        if((2*self.b_r)>self.children_length):
+            self.bottom_length=self.b_r#ここについては後で確認すべき
+        else:
+            self.bottom_length=self.children_length
+        self.high=(2*self.b_r)+self.high_children+self.margin
+        self.bool_child=True
+        self.child=[(self.high,self.bottom_length)]
+        print("C_minus was made!")
+
+    def show(self):
+        return "c-(" + self.head.show() + ',' + self.tail.show() + ")"
 
     def draw(self,children_list):
         self.length=children_list[0]
@@ -351,27 +465,24 @@ class C_plus(Node):
             draw_spline([self.start_point,self.high_point,self.end_point])
         draw_point(self.start_point)
         draw_point(self.end_point)
-        draw_arrow(self.high_point,self.high_theta+math.radians(90))
-        print("c",self.start_point,self.end_point,self.start_theta,self.end_theta,self.bottom_length,self.length,self.children_length,self.high)
+        draw_arrow(self.high_point,self.high_theta+math.radians(270))
         for_children=[]
         plus_length=self.length
         for i in range(0,self.children_list_count):
             plus_length=plus_length+self.margin/2
-            for_children.append([self.b_center,[plus_length,self.center_r,self.center]])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
+            for_children.append([plus_length,self.center_r,self.center])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
             child=self.children_list[i]
             plus_length=plus_length+child[1]
-        self.head.draw(for_children)
-
-
-class C_minus(Node):
-    def __init__(self, head ,tail):
-        self.head = head
-        self.tail = tail
-
-    def show(self):
-        return "c-(" + self.head.show() + ',' + self.tail.show() + ")"
+        print("plot C_minus.")
+        self.head.draw(self.b_center)
+        self.tail.draw(for_children)
 
 
 
-#   a0(cons(a+(b++(b++(l,l),l)),n))
-#
+
+#a0(cons(a+(b++(b++(l,l),l)),n))
+#a0(cons(a+(b++(be+(cons(c+(l,n),n)),l)),n))
+#a0(cons(a+(b++(be+(cons(c+(l,n),n)),be+(cons(c+(l,n),n)))),n))
+#a0(cons(a+(be+(cons(c+(l,cons(c-(l,n),n)),cons(c+(l,n),n)))),n))
+#a0(cons(a+(be+(cons(c+(l,n),cons(c+(l,n),n)))),n))
+#a0(cons(a+(be+(cons(c+(b++(b++(b++(be+(cons(c+(l,n),n)),be+(cons(c+(l,n),n))),l),l),cons(c-(l,n),n)),cons(c+(l,n),n)))),n))
