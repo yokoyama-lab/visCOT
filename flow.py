@@ -63,6 +63,13 @@ def draw_arrow(center,theta=0):
 def draw_point(center):
     plt.plot([center[0]], [center[1]],'k.')
 
+def draw_line(xy_1,xy_2):
+    x_1=xy_1[0]
+    y_1=xy_1[1]
+    x_2=xy_2[0]
+    y_2=xy_2[1]
+    plt.plot([x_1,x_2],[y_1, y_2], 'k-')
+
 class Node(object, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __init__(self):
@@ -71,10 +78,7 @@ class Node(object, metaclass=abc.ABCMeta):
     def show(self):
         pass
 
-    def draw(self):#描画する際に親から与える中心点
-        pass
-
-    def return_detail(self):#この図形の専有領域の半径を返す
+    def draw(self):
         pass
 
    # def parse(self):            # PLYでparseを作成するのではなく，このメソッドを実装してparserを作っても良い．
@@ -83,12 +87,31 @@ class Node(object, metaclass=abc.ABCMeta):
 class A0(Node):
     def __init__(self,head):    #子の半径を定義
         self.head = head        #抽象構文木の作成
+        self.margin = 0.5
+        self.children_list=head.child
         print("A0 was made!")
 
     def draw(self):#描画する際に親から与える中心点
-        children_list=[(0,0)]
-        self.head.draw(children_list)
-        print("A0 was drawn.")
+        self.long_child=0
+        self.children_data=[]
+        self.count_r=0
+        for i in range(0,len(self.children_list)):
+            if(self.children_list[i]>self.long_child):
+                self.long_child=self.children_list[i]
+        self.left_edge=-self.long_child-self.margin
+        self.right_edge=self.long_child+self.margin
+        for i in range(0,len(self.children_list)):
+            self.children_data.append((0,-self.count_r))
+            if(self.head.type=="A2"):
+                draw_line((self.left_edge,-self.count_r),(self.left_edge+self.children_list[i],-self.count_r))
+                draw_line((self.right_edge-self.children_list[i],-self.count_r),(self.right_edge,-self.count_r))
+            elif(self.head.type=="A_minus"):
+                draw_line((self.left_edge,-self.count_r+self.children_list[i]),(self.right_edge,-self.count_r+self.children_list[i]))
+            else:
+                draw_line((self.left_edge,-self.count_r-self.children_list[i]),(self.right_edge,-self.count_r-self.children_list[i]))
+            self.count_r=self.count_r+self.children_list[i]+1
+        self.head.draw(self.children_data)
+        print("plot A0.")
         #return center#子に与える中心点
 
     def show(self):
@@ -98,20 +121,29 @@ class B0_plus(Node):
     def __init__(self, head, tail):
         self.head = head
         self.tail = tail
+        print("B0_plus was made!.")
 
     def show(self):
         return "b0+("+ self.head.show() +"," + self.tail.show() +")"
+
+    def draw(self):
+        pass
 
 class B0_minus(Node):
     def __init__(self, head, tail):
         self.head = head
         self.tail = tail
+        print("B0_minus was made!.")
 
     def show(self):
         return "b0-("+ self.head.show() +"," + self.tail.show() + ")"
 
+    def draw(self):
+        pass
+
 class A_plus(Node):
     def __init__(self, head):
+        self.type="A_plus"
         self.head = head
         self.margin=0.5#子の専有領域と親の領域の余白
         self.r = head.r + self.margin
@@ -130,6 +162,7 @@ class A_plus(Node):
 
 class A_minus(Node):
     def __init__(self, head):
+        self.type="A_minus"
         self.head = head
         self.margin=0.5#子の専有領域と親の領域の余白
         self.r = head.r + self.margin
@@ -148,6 +181,7 @@ class A_minus(Node):
 
 class A2(Node):
     def __init__(self, head ,tail):
+        self.type="A2"
         self.head = head
         self.tail = tail
         self.margin=1#子同士のスペースの定義
@@ -207,6 +241,7 @@ class Cons(Node):
     def __init__(self, head, tail):
         self.head = head
         self.tail = tail
+        self.type = head.type
         self.head_child=[s for s in head.child if s != (0,0)]
         self.tail_child=[s for s in tail.child if s != (0,0)]
         self.child = []
@@ -237,6 +272,7 @@ class Cons(Node):
 
 class Nil(Node):
     def __init__(self):
+        self.type="Nil"
         self.child=([(0,0)])
         print("Nil was made!")
 
@@ -428,6 +464,7 @@ class C_plus(Node):
     def __init__(self, head ,tail):
         self.head = head
         self.tail = tail
+        self.type = "C_plus"
         self.margin=1#c系の要素の両脇に作るスペースの大きさ
         self.circ_margin=0.5#子のb系の要素と親の間の距離
         self.children_list=tail.child
@@ -492,6 +529,7 @@ class C_minus(Node):
     def __init__(self, head ,tail):
         self.head = head
         self.tail = tail
+        self.type = "C_minus"
         self.margin=1#c系の要素の両脇に作るスペースの大きさ
         self.circ_margin=0.5#子のb系の要素と親の間の距離
         self.children_list=tail.child
@@ -556,7 +594,8 @@ class C_minus(Node):
 
 
 
-#a0(cons(a+(b++(b++(l,l),l)),n))
+#a0(cons(a+(b++(b++(l,l),l)),cons(a+(l),n)))
+#a0(cons(a+(l),cons(a+(l),n)))
 #a0(cons(a2(cons(c+(l,n),cons(c+(l,n),n)),cons(c-(l,n),cons(c-(l,n),n))),n))
 #a0(cons(a+(b++(be+(cons(c+(l,n),n)),l)),n))
 #a0(cons(a+(b++(be+(cons(c+(l,n),n)),be+(cons(c+(l,n),n)))),n))
