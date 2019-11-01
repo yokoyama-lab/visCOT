@@ -108,6 +108,6 @@ if __name__ == '__main__':
         except EOFError:
             break
         print(parser.parse(s).show())
-        print(parser.parse(s).draw())
+        parser.parse(s).draw()
         flow.show_matplotlib()
         break

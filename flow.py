@@ -110,8 +110,8 @@ class A0(Node):
             else:
                 draw_line((self.left_edge,-self.count_r-self.children_list[i]),(self.right_edge,-self.count_r-self.children_list[i]))
             self.count_r=self.count_r+self.children_list[i]+1
-        self.head.draw(self.children_data)
         print("plot A0.")
+        self.head.draw(self.children_data)
         #return center#子に与える中心点
 
     def show(self):
