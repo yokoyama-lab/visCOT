@@ -95,21 +95,26 @@ class A0(Node):
         self.long_child=0
         self.children_data=[]
         self.count_r=0
-        for i in range(0,len(self.children_list)):
-            if(self.children_list[i]>self.long_child):
-                self.long_child=self.children_list[i]
-        self.left_edge=-self.long_child-self.margin
-        self.right_edge=self.long_child+self.margin
-        for i in range(0,len(self.children_list)):
-            self.children_data.append((0,-self.count_r))
-            if(self.head.type=="A2"):
-                draw_line((self.left_edge,-self.count_r),(self.left_edge+self.children_list[i],-self.count_r))
-                draw_line((self.right_edge-self.children_list[i],-self.count_r),(self.right_edge,-self.count_r))
-            elif(self.head.type=="A_minus"):
-                draw_line((self.left_edge,-self.count_r+self.children_list[i]),(self.right_edge,-self.count_r+self.children_list[i]))
-            else:
-                draw_line((self.left_edge,-self.count_r-self.children_list[i]),(self.right_edge,-self.count_r-self.children_list[i]))
-            self.count_r=self.count_r+self.children_list[i]+1
+        if(self.head.type=="Nil"):
+            draw_line((-1,0),(1,0))
+        else:
+            for i in range(0,len(self.children_list)):
+                child=self.children_list[i]
+                if(child[0]>self.long_child):
+                    self.long_child=child[0]
+            self.left_edge=-self.long_child-self.margin
+            self.right_edge=self.long_child+self.margin
+            for i in range(0,len(self.children_list)):
+                child=self.children_list[i]
+                self.children_data.append((0,-self.count_r))
+                if(child[1]=="A2"):
+                    draw_line((self.left_edge,-self.count_r),(-child[0],-self.count_r))
+                    draw_line((child[0],-self.count_r),(self.right_edge,-self.count_r))
+                elif(child[1]=="A_minus"):
+                    draw_line((self.left_edge,-self.count_r+child[0]),(self.right_edge,-self.count_r+child[0]))
+                else:
+                    draw_line((self.left_edge,-self.count_r-child[0]),(self.right_edge,-self.count_r-child[0]))
+                self.count_r=self.count_r+child[0]+1
         print("plot A0.")
         self.head.draw(self.children_data)
         #return center#子に与える中心点
@@ -147,7 +152,7 @@ class A_plus(Node):
         self.head = head
         self.margin=0.5#子の専有領域と親の領域の余白
         self.r = head.r + self.margin
-        self.child = [self.r]
+        self.child = [(self.r,self.type)]
         print("A_plus was made!")
 
     def show(self):
@@ -166,7 +171,7 @@ class A_minus(Node):
         self.head = head
         self.margin=0.5#子の専有領域と親の領域の余白
         self.r = head.r + self.margin
-        self.child = [self.r]
+        self.child = [(self.r,self.type)]
         print("A_minus was made!")
 
     def show(self):
@@ -210,7 +215,7 @@ class A2(Node):
             self.len_of_circ=self.len_of_minus_circ*2
         self.center_r=(self.len_of_circ)/(2*math.pi)#a_2の円の半径
         self.r=self.center_r+self.high#専有領域の半径
-        self.child=[self.r]
+        self.child=[(self.r,self.type)]
 
     def show(self):
         return "a2(" + self.head.show() + ',' + self.tail.show() + ")"
