@@ -114,7 +114,7 @@ class A0(Node):
                     draw_line((self.left_edge,-self.count_r+child[0]),(self.right_edge,-self.count_r+child[0]))
                 else:
                     draw_line((self.left_edge,-self.count_r-child[0]),(self.right_edge,-self.count_r-child[0]))
-                self.count_r=self.count_r+child[0]+1
+                self.count_r=self.count_r+child[0]*2+1
         print("plot A0.")
         self.head.draw(self.children_data)
         #return center#子に与える中心点
