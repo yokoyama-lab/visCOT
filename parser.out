@@ -1,0 +1,971 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Grammar
+
+Rule 0     S' -> s
+Rule 1     s -> A0 LPAREN as RPAREN
+Rule 2     s -> B0_PLUS LPAREN b_plus COMMA LPAREN cs_plus RPAREN RPAREN
+Rule 3     s -> B0_MINUS LPAREN b_minus COMMA LPAREN cs_minus RPAREN RPAREN
+Rule 4     as -> NIL
+Rule 5     as -> CONS LPAREN a COMMA as RPAREN
+Rule 6     a -> A_PLUS LPAREN b_plus RPAREN
+Rule 7     a -> A_MINUS LPAREN b_minus RPAREN
+Rule 8     a -> A2 LPAREN cs_plus COMMA cs_minus RPAREN
+Rule 9     b_plus -> LEAF
+Rule 10    b_plus -> B_PLUS_PLUS LPAREN b_plus COMMA b_plus RPAREN
+Rule 11    b_plus -> B_PLUS_MINUS LPAREN b_plus COMMA b_minus RPAREN
+Rule 12    b_plus -> BETA_PLUS LPAREN cs_plus RPAREN
+Rule 13    b_minus -> LEAF
+Rule 14    b_minus -> B_MINUS_MINUS LPAREN b_minus COMMA b_minus RPAREN
+Rule 15    b_minus -> B_MINUS_PLUS LPAREN b_minus COMMA b_plus RPAREN
+Rule 16    b_minus -> BETA_MINUS LPAREN cs_minus RPAREN
+Rule 17    c_plus -> C_PLUS LPAREN b_plus COMMA cs_minus RPAREN
+Rule 18    c_minus -> C_MINUS LPAREN b_minus COMMA cs_plus RPAREN
+Rule 19    cs_plus -> NIL
+Rule 20    cs_plus -> CONS LPAREN c_plus COMMA cs_plus RPAREN
+Rule 21    cs_minus -> NIL
+Rule 22    cs_minus -> CONS LPAREN c_minus COMMA cs_minus RPAREN
+
+Terminals, with rules where they appear
+
+A0                   : 1
+A2                   : 8
+A_MINUS              : 7
+A_PLUS               : 6
+B0_MINUS             : 3
+B0_PLUS              : 2
+BETA_MINUS           : 16
+BETA_PLUS            : 12
+B_MINUS_MINUS        : 14
+B_MINUS_PLUS         : 15
+B_PLUS_MINUS         : 11
+B_PLUS_PLUS          : 10
+COMMA                : 2 3 5 8 10 11 14 15 17 18 20 22
+CONS                 : 5 20 22
+C_MINUS              : 18
+C_PLUS               : 17
+LEAF                 : 9 13
+LPAREN               : 1 2 2 3 3 5 6 7 8 10 11 12 14 15 16 17 18 20 22
+NIL                  : 4 19 21
+RPAREN               : 1 2 2 3 3 5 6 7 8 10 11 12 14 15 16 17 18 20 22
+error                : 
+
+Nonterminals, with rules where they appear
+
+a                    : 5
+as                   : 1 5
+b_minus              : 3 7 11 14 14 15 18
+b_plus               : 2 6 10 10 11 15 17
+c_minus              : 22
+c_plus               : 20
+cs_minus             : 3 8 16 17 22
+cs_plus              : 2 8 12 18 20
+s                    : 0
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . s
+    (1) s -> . A0 LPAREN as RPAREN
+    (2) s -> . B0_PLUS LPAREN b_plus COMMA LPAREN cs_plus RPAREN RPAREN
+    (3) s -> . B0_MINUS LPAREN b_minus COMMA LPAREN cs_minus RPAREN RPAREN
+
+    A0              shift and go to state 2
+    B0_PLUS         shift and go to state 3
+    B0_MINUS        shift and go to state 4
+
+    s                              shift and go to state 1
+
+state 1
+
+    (0) S' -> s .
+
+
+
+state 2
+
+    (1) s -> A0 . LPAREN as RPAREN
+
+    LPAREN          shift and go to state 5
+
+
+state 3
+
+    (2) s -> B0_PLUS . LPAREN b_plus COMMA LPAREN cs_plus RPAREN RPAREN
+
+    LPAREN          shift and go to state 6
+
+
+state 4
+
+    (3) s -> B0_MINUS . LPAREN b_minus COMMA LPAREN cs_minus RPAREN RPAREN
+
+    LPAREN          shift and go to state 7
+
+
+state 5
+
+    (1) s -> A0 LPAREN . as RPAREN
+    (4) as -> . NIL
+    (5) as -> . CONS LPAREN a COMMA as RPAREN
+
+    NIL             shift and go to state 9
+    CONS            shift and go to state 10
+
+    as                             shift and go to state 8
+
+state 6
+
+    (2) s -> B0_PLUS LPAREN . b_plus COMMA LPAREN cs_plus RPAREN RPAREN
+    (9) b_plus -> . LEAF
+    (10) b_plus -> . B_PLUS_PLUS LPAREN b_plus COMMA b_plus RPAREN
+    (11) b_plus -> . B_PLUS_MINUS LPAREN b_plus COMMA b_minus RPAREN
+    (12) b_plus -> . BETA_PLUS LPAREN cs_plus RPAREN
+
+    LEAF            shift and go to state 12
+    B_PLUS_PLUS     shift and go to state 13
+    B_PLUS_MINUS    shift and go to state 14
+    BETA_PLUS       shift and go to state 15
+
+    b_plus                         shift and go to state 11
+
+state 7
+
+    (3) s -> B0_MINUS LPAREN . b_minus COMMA LPAREN cs_minus RPAREN RPAREN
+    (13) b_minus -> . LEAF
+    (14) b_minus -> . B_MINUS_MINUS LPAREN b_minus COMMA b_minus RPAREN
+    (15) b_minus -> . B_MINUS_PLUS LPAREN b_minus COMMA b_plus RPAREN
+    (16) b_minus -> . BETA_MINUS LPAREN cs_minus RPAREN
+
+    LEAF            shift and go to state 17
+    B_MINUS_MINUS   shift and go to state 18
+    B_MINUS_PLUS    shift and go to state 19
+    BETA_MINUS      shift and go to state 20
+
+    b_minus                        shift and go to state 16
+
+state 8
+
+    (1) s -> A0 LPAREN as . RPAREN
+
+    RPAREN          shift and go to state 21
+
+
+state 9
+
+    (4) as -> NIL .
+
+    RPAREN          reduce using rule 4 (as -> NIL .)
+
+
+state 10
+
+    (5) as -> CONS . LPAREN a COMMA as RPAREN
+
+    LPAREN          shift and go to state 22
+
+
+state 11
+
+    (2) s -> B0_PLUS LPAREN b_plus . COMMA LPAREN cs_plus RPAREN RPAREN
+
+    COMMA           shift and go to state 23
+
+
+state 12
+
+    (9) b_plus -> LEAF .
+
+    COMMA           reduce using rule 9 (b_plus -> LEAF .)
+    RPAREN          reduce using rule 9 (b_plus -> LEAF .)
+
+
+state 13
+
+    (10) b_plus -> B_PLUS_PLUS . LPAREN b_plus COMMA b_plus RPAREN
+
+    LPAREN          shift and go to state 24
+
+
+state 14
+
+    (11) b_plus -> B_PLUS_MINUS . LPAREN b_plus COMMA b_minus RPAREN
+
+    LPAREN          shift and go to state 25
+
+
+state 15
+
+    (12) b_plus -> BETA_PLUS . LPAREN cs_plus RPAREN
+
+    LPAREN          shift and go to state 26
+
+
+state 16
+
+    (3) s -> B0_MINUS LPAREN b_minus . COMMA LPAREN cs_minus RPAREN RPAREN
+
+    COMMA           shift and go to state 27
+
+
+state 17
+
+    (13) b_minus -> LEAF .
+
+    COMMA           reduce using rule 13 (b_minus -> LEAF .)
+    RPAREN          reduce using rule 13 (b_minus -> LEAF .)
+
+
+state 18
+
+    (14) b_minus -> B_MINUS_MINUS . LPAREN b_minus COMMA b_minus RPAREN
+
+    LPAREN          shift and go to state 28
+
+
+state 19
+
+    (15) b_minus -> B_MINUS_PLUS . LPAREN b_minus COMMA b_plus RPAREN
+
+    LPAREN          shift and go to state 29
+
+
+state 20
+
+    (16) b_minus -> BETA_MINUS . LPAREN cs_minus RPAREN
+
+    LPAREN          shift and go to state 30
+
+
+state 21
+
+    (1) s -> A0 LPAREN as RPAREN .
+
+    $end            reduce using rule 1 (s -> A0 LPAREN as RPAREN .)
+
+
+state 22
+
+    (5) as -> CONS LPAREN . a COMMA as RPAREN
+    (6) a -> . A_PLUS LPAREN b_plus RPAREN
+    (7) a -> . A_MINUS LPAREN b_minus RPAREN
+    (8) a -> . A2 LPAREN cs_plus COMMA cs_minus RPAREN
+
+    A_PLUS          shift and go to state 32
+    A_MINUS         shift and go to state 33
+    A2              shift and go to state 34
+
+    a                              shift and go to state 31
+
+state 23
+
+    (2) s -> B0_PLUS LPAREN b_plus COMMA . LPAREN cs_plus RPAREN RPAREN
+
+    LPAREN          shift and go to state 35
+
+
+state 24
+
+    (10) b_plus -> B_PLUS_PLUS LPAREN . b_plus COMMA b_plus RPAREN
+    (9) b_plus -> . LEAF
+    (10) b_plus -> . B_PLUS_PLUS LPAREN b_plus COMMA b_plus RPAREN
+    (11) b_plus -> . B_PLUS_MINUS LPAREN b_plus COMMA b_minus RPAREN
+    (12) b_plus -> . BETA_PLUS LPAREN cs_plus RPAREN
+
+    LEAF            shift and go to state 12
+    B_PLUS_PLUS     shift and go to state 13
+    B_PLUS_MINUS    shift and go to state 14
+    BETA_PLUS       shift and go to state 15
+
+    b_plus                         shift and go to state 36
+
+state 25
+
+    (11) b_plus -> B_PLUS_MINUS LPAREN . b_plus COMMA b_minus RPAREN
+    (9) b_plus -> . LEAF
+    (10) b_plus -> . B_PLUS_PLUS LPAREN b_plus COMMA b_plus RPAREN
+    (11) b_plus -> . B_PLUS_MINUS LPAREN b_plus COMMA b_minus RPAREN
+    (12) b_plus -> . BETA_PLUS LPAREN cs_plus RPAREN
+
+    LEAF            shift and go to state 12
+    B_PLUS_PLUS     shift and go to state 13
+    B_PLUS_MINUS    shift and go to state 14
+    BETA_PLUS       shift and go to state 15
+
+    b_plus                         shift and go to state 37
+
+state 26
+
+    (12) b_plus -> BETA_PLUS LPAREN . cs_plus RPAREN
+    (19) cs_plus -> . NIL
+    (20) cs_plus -> . CONS LPAREN c_plus COMMA cs_plus RPAREN
+
+    NIL             shift and go to state 39
+    CONS            shift and go to state 40
+
+    cs_plus                        shift and go to state 38
+
+state 27
+
+    (3) s -> B0_MINUS LPAREN b_minus COMMA . LPAREN cs_minus RPAREN RPAREN
+
+    LPAREN          shift and go to state 41
+
+
+state 28
+
+    (14) b_minus -> B_MINUS_MINUS LPAREN . b_minus COMMA b_minus RPAREN
+    (13) b_minus -> . LEAF
+    (14) b_minus -> . B_MINUS_MINUS LPAREN b_minus COMMA b_minus RPAREN
+    (15) b_minus -> . B_MINUS_PLUS LPAREN b_minus COMMA b_plus RPAREN
+    (16) b_minus -> . BETA_MINUS LPAREN cs_minus RPAREN
+
+    LEAF            shift and go to state 17
+    B_MINUS_MINUS   shift and go to state 18
+    B_MINUS_PLUS    shift and go to state 19
+    BETA_MINUS      shift and go to state 20
+
+    b_minus                        shift and go to state 42
+
+state 29
+
+    (15) b_minus -> B_MINUS_PLUS LPAREN . b_minus COMMA b_plus RPAREN
+    (13) b_minus -> . LEAF
+    (14) b_minus -> . B_MINUS_MINUS LPAREN b_minus COMMA b_minus RPAREN
+    (15) b_minus -> . B_MINUS_PLUS LPAREN b_minus COMMA b_plus RPAREN
+    (16) b_minus -> . BETA_MINUS LPAREN cs_minus RPAREN
+
+    LEAF            shift and go to state 17
+    B_MINUS_MINUS   shift and go to state 18
+    B_MINUS_PLUS    shift and go to state 19
+    BETA_MINUS      shift and go to state 20
+
+    b_minus                        shift and go to state 43
+
+state 30
+
+    (16) b_minus -> BETA_MINUS LPAREN . cs_minus RPAREN
+    (21) cs_minus -> . NIL
+    (22) cs_minus -> . CONS LPAREN c_minus COMMA cs_minus RPAREN
+
+    NIL             shift and go to state 45
+    CONS            shift and go to state 46
+
+    cs_minus                       shift and go to state 44
+
+state 31
+
+    (5) as -> CONS LPAREN a . COMMA as RPAREN
+
+    COMMA           shift and go to state 47
+
+
+state 32
+
+    (6) a -> A_PLUS . LPAREN b_plus RPAREN
+
+    LPAREN          shift and go to state 48
+
+
+state 33
+
+    (7) a -> A_MINUS . LPAREN b_minus RPAREN
+
+    LPAREN          shift and go to state 49
+
+
+state 34
+
+    (8) a -> A2 . LPAREN cs_plus COMMA cs_minus RPAREN
+
+    LPAREN          shift and go to state 50
+
+
+state 35
+
+    (2) s -> B0_PLUS LPAREN b_plus COMMA LPAREN . cs_plus RPAREN RPAREN
+    (19) cs_plus -> . NIL
+    (20) cs_plus -> . CONS LPAREN c_plus COMMA cs_plus RPAREN
+
+    NIL             shift and go to state 39
+    CONS            shift and go to state 40
+
+    cs_plus                        shift and go to state 51
+
+state 36
+
+    (10) b_plus -> B_PLUS_PLUS LPAREN b_plus . COMMA b_plus RPAREN
+
+    COMMA           shift and go to state 52
+
+
+state 37
+
+    (11) b_plus -> B_PLUS_MINUS LPAREN b_plus . COMMA b_minus RPAREN
+
+    COMMA           shift and go to state 53
+
+
+state 38
+
+    (12) b_plus -> BETA_PLUS LPAREN cs_plus . RPAREN
+
+    RPAREN          shift and go to state 54
+
+
+state 39
+
+    (19) cs_plus -> NIL .
+
+    RPAREN          reduce using rule 19 (cs_plus -> NIL .)
+    COMMA           reduce using rule 19 (cs_plus -> NIL .)
+
+
+state 40
+
+    (20) cs_plus -> CONS . LPAREN c_plus COMMA cs_plus RPAREN
+
+    LPAREN          shift and go to state 55
+
+
+state 41
+
+    (3) s -> B0_MINUS LPAREN b_minus COMMA LPAREN . cs_minus RPAREN RPAREN
+    (21) cs_minus -> . NIL
+    (22) cs_minus -> . CONS LPAREN c_minus COMMA cs_minus RPAREN
+
+    NIL             shift and go to state 45
+    CONS            shift and go to state 46
+
+    cs_minus                       shift and go to state 56
+
+state 42
+
+    (14) b_minus -> B_MINUS_MINUS LPAREN b_minus . COMMA b_minus RPAREN
+
+    COMMA           shift and go to state 57
+
+
+state 43
+
+    (15) b_minus -> B_MINUS_PLUS LPAREN b_minus . COMMA b_plus RPAREN
+
+    COMMA           shift and go to state 58
+
+
+state 44
+
+    (16) b_minus -> BETA_MINUS LPAREN cs_minus . RPAREN
+
+    RPAREN          shift and go to state 59
+
+
+state 45
+
+    (21) cs_minus -> NIL .
+
+    RPAREN          reduce using rule 21 (cs_minus -> NIL .)
+
+
+state 46
+
+    (22) cs_minus -> CONS . LPAREN c_minus COMMA cs_minus RPAREN
+
+    LPAREN          shift and go to state 60
+
+
+state 47
+
+    (5) as -> CONS LPAREN a COMMA . as RPAREN
+    (4) as -> . NIL
+    (5) as -> . CONS LPAREN a COMMA as RPAREN
+
+    NIL             shift and go to state 9
+    CONS            shift and go to state 10
+
+    as                             shift and go to state 61
+
+state 48
+
+    (6) a -> A_PLUS LPAREN . b_plus RPAREN
+    (9) b_plus -> . LEAF
+    (10) b_plus -> . B_PLUS_PLUS LPAREN b_plus COMMA b_plus RPAREN
+    (11) b_plus -> . B_PLUS_MINUS LPAREN b_plus COMMA b_minus RPAREN
+    (12) b_plus -> . BETA_PLUS LPAREN cs_plus RPAREN
+
+    LEAF            shift and go to state 12
+    B_PLUS_PLUS     shift and go to state 13
+    B_PLUS_MINUS    shift and go to state 14
+    BETA_PLUS       shift and go to state 15
+
+    b_plus                         shift and go to state 62
+
+state 49
+
+    (7) a -> A_MINUS LPAREN . b_minus RPAREN
+    (13) b_minus -> . LEAF
+    (14) b_minus -> . B_MINUS_MINUS LPAREN b_minus COMMA b_minus RPAREN
+    (15) b_minus -> . B_MINUS_PLUS LPAREN b_minus COMMA b_plus RPAREN
+    (16) b_minus -> . BETA_MINUS LPAREN cs_minus RPAREN
+
+    LEAF            shift and go to state 17
+    B_MINUS_MINUS   shift and go to state 18
+    B_MINUS_PLUS    shift and go to state 19
+    BETA_MINUS      shift and go to state 20
+
+    b_minus                        shift and go to state 63
+
+state 50
+
+    (8) a -> A2 LPAREN . cs_plus COMMA cs_minus RPAREN
+    (19) cs_plus -> . NIL
+    (20) cs_plus -> . CONS LPAREN c_plus COMMA cs_plus RPAREN
+
+    NIL             shift and go to state 39
+    CONS            shift and go to state 40
+
+    cs_plus                        shift and go to state 64
+
+state 51
+
+    (2) s -> B0_PLUS LPAREN b_plus COMMA LPAREN cs_plus . RPAREN RPAREN
+
+    RPAREN          shift and go to state 65
+
+
+state 52
+
+    (10) b_plus -> B_PLUS_PLUS LPAREN b_plus COMMA . b_plus RPAREN
+    (9) b_plus -> . LEAF
+    (10) b_plus -> . B_PLUS_PLUS LPAREN b_plus COMMA b_plus RPAREN
+    (11) b_plus -> . B_PLUS_MINUS LPAREN b_plus COMMA b_minus RPAREN
+    (12) b_plus -> . BETA_PLUS LPAREN cs_plus RPAREN
+
+    LEAF            shift and go to state 12
+    B_PLUS_PLUS     shift and go to state 13
+    B_PLUS_MINUS    shift and go to state 14
+    BETA_PLUS       shift and go to state 15
+
+    b_plus                         shift and go to state 66
+
+state 53
+
+    (11) b_plus -> B_PLUS_MINUS LPAREN b_plus COMMA . b_minus RPAREN
+    (13) b_minus -> . LEAF
+    (14) b_minus -> . B_MINUS_MINUS LPAREN b_minus COMMA b_minus RPAREN
+    (15) b_minus -> . B_MINUS_PLUS LPAREN b_minus COMMA b_plus RPAREN
+    (16) b_minus -> . BETA_MINUS LPAREN cs_minus RPAREN
+
+    LEAF            shift and go to state 17
+    B_MINUS_MINUS   shift and go to state 18
+    B_MINUS_PLUS    shift and go to state 19
+    BETA_MINUS      shift and go to state 20
+
+    b_minus                        shift and go to state 67
+
+state 54
+
+    (12) b_plus -> BETA_PLUS LPAREN cs_plus RPAREN .
+
+    COMMA           reduce using rule 12 (b_plus -> BETA_PLUS LPAREN cs_plus RPAREN .)
+    RPAREN          reduce using rule 12 (b_plus -> BETA_PLUS LPAREN cs_plus RPAREN .)
+
+
+state 55
+
+    (20) cs_plus -> CONS LPAREN . c_plus COMMA cs_plus RPAREN
+    (17) c_plus -> . C_PLUS LPAREN b_plus COMMA cs_minus RPAREN
+
+    C_PLUS          shift and go to state 69
+
+    c_plus                         shift and go to state 68
+
+state 56
+
+    (3) s -> B0_MINUS LPAREN b_minus COMMA LPAREN cs_minus . RPAREN RPAREN
+
+    RPAREN          shift and go to state 70
+
+
+state 57
+
+    (14) b_minus -> B_MINUS_MINUS LPAREN b_minus COMMA . b_minus RPAREN
+    (13) b_minus -> . LEAF
+    (14) b_minus -> . B_MINUS_MINUS LPAREN b_minus COMMA b_minus RPAREN
+    (15) b_minus -> . B_MINUS_PLUS LPAREN b_minus COMMA b_plus RPAREN
+    (16) b_minus -> . BETA_MINUS LPAREN cs_minus RPAREN
+
+    LEAF            shift and go to state 17
+    B_MINUS_MINUS   shift and go to state 18
+    B_MINUS_PLUS    shift and go to state 19
+    BETA_MINUS      shift and go to state 20
+
+    b_minus                        shift and go to state 71
+
+state 58
+
+    (15) b_minus -> B_MINUS_PLUS LPAREN b_minus COMMA . b_plus RPAREN
+    (9) b_plus -> . LEAF
+    (10) b_plus -> . B_PLUS_PLUS LPAREN b_plus COMMA b_plus RPAREN
+    (11) b_plus -> . B_PLUS_MINUS LPAREN b_plus COMMA b_minus RPAREN
+    (12) b_plus -> . BETA_PLUS LPAREN cs_plus RPAREN
+
+    LEAF            shift and go to state 12
+    B_PLUS_PLUS     shift and go to state 13
+    B_PLUS_MINUS    shift and go to state 14
+    BETA_PLUS       shift and go to state 15
+
+    b_plus                         shift and go to state 72
+
+state 59
+
+    (16) b_minus -> BETA_MINUS LPAREN cs_minus RPAREN .
+
+    COMMA           reduce using rule 16 (b_minus -> BETA_MINUS LPAREN cs_minus RPAREN .)
+    RPAREN          reduce using rule 16 (b_minus -> BETA_MINUS LPAREN cs_minus RPAREN .)
+
+
+state 60
+
+    (22) cs_minus -> CONS LPAREN . c_minus COMMA cs_minus RPAREN
+    (18) c_minus -> . C_MINUS LPAREN b_minus COMMA cs_plus RPAREN
+
+    C_MINUS         shift and go to state 74
+
+    c_minus                        shift and go to state 73
+
+state 61
+
+    (5) as -> CONS LPAREN a COMMA as . RPAREN
+
+    RPAREN          shift and go to state 75
+
+
+state 62
+
+    (6) a -> A_PLUS LPAREN b_plus . RPAREN
+
+    RPAREN          shift and go to state 76
+
+
+state 63
+
+    (7) a -> A_MINUS LPAREN b_minus . RPAREN
+
+    RPAREN          shift and go to state 77
+
+
+state 64
+
+    (8) a -> A2 LPAREN cs_plus . COMMA cs_minus RPAREN
+
+    COMMA           shift and go to state 78
+
+
+state 65
+
+    (2) s -> B0_PLUS LPAREN b_plus COMMA LPAREN cs_plus RPAREN . RPAREN
+
+    RPAREN          shift and go to state 79
+
+
+state 66
+
+    (10) b_plus -> B_PLUS_PLUS LPAREN b_plus COMMA b_plus . RPAREN
+
+    RPAREN          shift and go to state 80
+
+
+state 67
+
+    (11) b_plus -> B_PLUS_MINUS LPAREN b_plus COMMA b_minus . RPAREN
+
+    RPAREN          shift and go to state 81
+
+
+state 68
+
+    (20) cs_plus -> CONS LPAREN c_plus . COMMA cs_plus RPAREN
+
+    COMMA           shift and go to state 82
+
+
+state 69
+
+    (17) c_plus -> C_PLUS . LPAREN b_plus COMMA cs_minus RPAREN
+
+    LPAREN          shift and go to state 83
+
+
+state 70
+
+    (3) s -> B0_MINUS LPAREN b_minus COMMA LPAREN cs_minus RPAREN . RPAREN
+
+    RPAREN          shift and go to state 84
+
+
+state 71
+
+    (14) b_minus -> B_MINUS_MINUS LPAREN b_minus COMMA b_minus . RPAREN
+
+    RPAREN          shift and go to state 85
+
+
+state 72
+
+    (15) b_minus -> B_MINUS_PLUS LPAREN b_minus COMMA b_plus . RPAREN
+
+    RPAREN          shift and go to state 86
+
+
+state 73
+
+    (22) cs_minus -> CONS LPAREN c_minus . COMMA cs_minus RPAREN
+
+    COMMA           shift and go to state 87
+
+
+state 74
+
+    (18) c_minus -> C_MINUS . LPAREN b_minus COMMA cs_plus RPAREN
+
+    LPAREN          shift and go to state 88
+
+
+state 75
+
+    (5) as -> CONS LPAREN a COMMA as RPAREN .
+
+    RPAREN          reduce using rule 5 (as -> CONS LPAREN a COMMA as RPAREN .)
+
+
+state 76
+
+    (6) a -> A_PLUS LPAREN b_plus RPAREN .
+
+    COMMA           reduce using rule 6 (a -> A_PLUS LPAREN b_plus RPAREN .)
+
+
+state 77
+
+    (7) a -> A_MINUS LPAREN b_minus RPAREN .
+
+    COMMA           reduce using rule 7 (a -> A_MINUS LPAREN b_minus RPAREN .)
+
+
+state 78
+
+    (8) a -> A2 LPAREN cs_plus COMMA . cs_minus RPAREN
+    (21) cs_minus -> . NIL
+    (22) cs_minus -> . CONS LPAREN c_minus COMMA cs_minus RPAREN
+
+    NIL             shift and go to state 45
+    CONS            shift and go to state 46
+
+    cs_minus                       shift and go to state 89
+
+state 79
+
+    (2) s -> B0_PLUS LPAREN b_plus COMMA LPAREN cs_plus RPAREN RPAREN .
+
+    $end            reduce using rule 2 (s -> B0_PLUS LPAREN b_plus COMMA LPAREN cs_plus RPAREN RPAREN .)
+
+
+state 80
+
+    (10) b_plus -> B_PLUS_PLUS LPAREN b_plus COMMA b_plus RPAREN .
+
+    COMMA           reduce using rule 10 (b_plus -> B_PLUS_PLUS LPAREN b_plus COMMA b_plus RPAREN .)
+    RPAREN          reduce using rule 10 (b_plus -> B_PLUS_PLUS LPAREN b_plus COMMA b_plus RPAREN .)
+
+
+state 81
+
+    (11) b_plus -> B_PLUS_MINUS LPAREN b_plus COMMA b_minus RPAREN .
+
+    COMMA           reduce using rule 11 (b_plus -> B_PLUS_MINUS LPAREN b_plus COMMA b_minus RPAREN .)
+    RPAREN          reduce using rule 11 (b_plus -> B_PLUS_MINUS LPAREN b_plus COMMA b_minus RPAREN .)
+
+
+state 82
+
+    (20) cs_plus -> CONS LPAREN c_plus COMMA . cs_plus RPAREN
+    (19) cs_plus -> . NIL
+    (20) cs_plus -> . CONS LPAREN c_plus COMMA cs_plus RPAREN
+
+    NIL             shift and go to state 39
+    CONS            shift and go to state 40
+
+    cs_plus                        shift and go to state 90
+
+state 83
+
+    (17) c_plus -> C_PLUS LPAREN . b_plus COMMA cs_minus RPAREN
+    (9) b_plus -> . LEAF
+    (10) b_plus -> . B_PLUS_PLUS LPAREN b_plus COMMA b_plus RPAREN
+    (11) b_plus -> . B_PLUS_MINUS LPAREN b_plus COMMA b_minus RPAREN
+    (12) b_plus -> . BETA_PLUS LPAREN cs_plus RPAREN
+
+    LEAF            shift and go to state 12
+    B_PLUS_PLUS     shift and go to state 13
+    B_PLUS_MINUS    shift and go to state 14
+    BETA_PLUS       shift and go to state 15
+
+    b_plus                         shift and go to state 91
+
+state 84
+
+    (3) s -> B0_MINUS LPAREN b_minus COMMA LPAREN cs_minus RPAREN RPAREN .
+
+    $end            reduce using rule 3 (s -> B0_MINUS LPAREN b_minus COMMA LPAREN cs_minus RPAREN RPAREN .)
+
+
+state 85
+
+    (14) b_minus -> B_MINUS_MINUS LPAREN b_minus COMMA b_minus RPAREN .
+
+    COMMA           reduce using rule 14 (b_minus -> B_MINUS_MINUS LPAREN b_minus COMMA b_minus RPAREN .)
+    RPAREN          reduce using rule 14 (b_minus -> B_MINUS_MINUS LPAREN b_minus COMMA b_minus RPAREN .)
+
+
+state 86
+
+    (15) b_minus -> B_MINUS_PLUS LPAREN b_minus COMMA b_plus RPAREN .
+
+    COMMA           reduce using rule 15 (b_minus -> B_MINUS_PLUS LPAREN b_minus COMMA b_plus RPAREN .)
+    RPAREN          reduce using rule 15 (b_minus -> B_MINUS_PLUS LPAREN b_minus COMMA b_plus RPAREN .)
+
+
+state 87
+
+    (22) cs_minus -> CONS LPAREN c_minus COMMA . cs_minus RPAREN
+    (21) cs_minus -> . NIL
+    (22) cs_minus -> . CONS LPAREN c_minus COMMA cs_minus RPAREN
+
+    NIL             shift and go to state 45
+    CONS            shift and go to state 46
+
+    cs_minus                       shift and go to state 92
+
+state 88
+
+    (18) c_minus -> C_MINUS LPAREN . b_minus COMMA cs_plus RPAREN
+    (13) b_minus -> . LEAF
+    (14) b_minus -> . B_MINUS_MINUS LPAREN b_minus COMMA b_minus RPAREN
+    (15) b_minus -> . B_MINUS_PLUS LPAREN b_minus COMMA b_plus RPAREN
+    (16) b_minus -> . BETA_MINUS LPAREN cs_minus RPAREN
+
+    LEAF            shift and go to state 17
+    B_MINUS_MINUS   shift and go to state 18
+    B_MINUS_PLUS    shift and go to state 19
+    BETA_MINUS      shift and go to state 20
+
+    b_minus                        shift and go to state 93
+
+state 89
+
+    (8) a -> A2 LPAREN cs_plus COMMA cs_minus . RPAREN
+
+    RPAREN          shift and go to state 94
+
+
+state 90
+
+    (20) cs_plus -> CONS LPAREN c_plus COMMA cs_plus . RPAREN
+
+    RPAREN          shift and go to state 95
+
+
+state 91
+
+    (17) c_plus -> C_PLUS LPAREN b_plus . COMMA cs_minus RPAREN
+
+    COMMA           shift and go to state 96
+
+
+state 92
+
+    (22) cs_minus -> CONS LPAREN c_minus COMMA cs_minus . RPAREN
+
+    RPAREN          shift and go to state 97
+
+
+state 93
+
+    (18) c_minus -> C_MINUS LPAREN b_minus . COMMA cs_plus RPAREN
+
+    COMMA           shift and go to state 98
+
+
+state 94
+
+    (8) a -> A2 LPAREN cs_plus COMMA cs_minus RPAREN .
+
+    COMMA           reduce using rule 8 (a -> A2 LPAREN cs_plus COMMA cs_minus RPAREN .)
+
+
+state 95
+
+    (20) cs_plus -> CONS LPAREN c_plus COMMA cs_plus RPAREN .
+
+    RPAREN          reduce using rule 20 (cs_plus -> CONS LPAREN c_plus COMMA cs_plus RPAREN .)
+    COMMA           reduce using rule 20 (cs_plus -> CONS LPAREN c_plus COMMA cs_plus RPAREN .)
+
+
+state 96
+
+    (17) c_plus -> C_PLUS LPAREN b_plus COMMA . cs_minus RPAREN
+    (21) cs_minus -> . NIL
+    (22) cs_minus -> . CONS LPAREN c_minus COMMA cs_minus RPAREN
+
+    NIL             shift and go to state 45
+    CONS            shift and go to state 46
+
+    cs_minus                       shift and go to state 99
+
+state 97
+
+    (22) cs_minus -> CONS LPAREN c_minus COMMA cs_minus RPAREN .
+
+    RPAREN          reduce using rule 22 (cs_minus -> CONS LPAREN c_minus COMMA cs_minus RPAREN .)
+
+
+state 98
+
+    (18) c_minus -> C_MINUS LPAREN b_minus COMMA . cs_plus RPAREN
+    (19) cs_plus -> . NIL
+    (20) cs_plus -> . CONS LPAREN c_plus COMMA cs_plus RPAREN
+
+    NIL             shift and go to state 39
+    CONS            shift and go to state 40
+
+    cs_plus                        shift and go to state 100
+
+state 99
+
+    (17) c_plus -> C_PLUS LPAREN b_plus COMMA cs_minus . RPAREN
+
+    RPAREN          shift and go to state 101
+
+
+state 100
+
+    (18) c_minus -> C_MINUS LPAREN b_minus COMMA cs_plus . RPAREN
+
+    RPAREN          shift and go to state 102
+
+
+state 101
+
+    (17) c_plus -> C_PLUS LPAREN b_plus COMMA cs_minus RPAREN .
+
+    COMMA           reduce using rule 17 (c_plus -> C_PLUS LPAREN b_plus COMMA cs_minus RPAREN .)
+
+
+state 102
+
+    (18) c_minus -> C_MINUS LPAREN b_minus COMMA cs_plus RPAREN .
+
+    COMMA           reduce using rule 18 (c_minus -> C_MINUS LPAREN b_minus COMMA cs_plus RPAREN .)
+

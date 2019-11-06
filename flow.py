@@ -18,6 +18,10 @@ def show_matplotlib():
     print("draw successful!")
     plt.show()
 
+def save_matplotlib(self):
+    print("save picture! ")
+    plt.savefig(self)
+
 #スプライン補間
 def spline(x,y,point,deg):
     tck,u = interpolate.splprep([x,y],k=deg,s=0)
