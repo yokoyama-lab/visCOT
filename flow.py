@@ -63,12 +63,17 @@ def draw_arrow(center,theta=0):
 def draw_point(center):
     plt.plot([center[0]], [center[1]],'k.')
 
+#xy_1からxy_2まで直線を引く関数
 def draw_line(xy_1,xy_2):
     x_1=xy_1[0]
     y_1=xy_1[1]
     x_2=xy_2[0]
     y_2=xy_2[1]
     plt.plot([x_1,x_2],[y_1, y_2], 'k-')
+
+#半径とthetaと中心点を使って二次元上の点の位置を求める関数
+def theta_point(theta,r,center):
+    return ((r*math.cos(theta))+center[0],(r*math.sin(theta))+center[1])
 
 class Node(object, metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -86,6 +91,7 @@ class Node(object, metaclass=abc.ABCMeta):
 
 class A0(Node):
     def __init__(self,head):    #子の半径を定義
+        self.type = "A0"
         self.head = head        #抽象構文木の作成
         self.margin = 0.5
         self.children_list=head.child
@@ -126,13 +132,45 @@ class B0_plus(Node):
     def __init__(self, head, tail):
         self.head = head
         self.tail = tail
+        self.margin=0.5
+        self.children_list=tail.child
+        self.children_list_count=len(self.children_list)
+        self.high_children=0
+        self.children_length=0
+        self.longest_children=0
+        for i in range(0,self.children_list_count):
+            child=self.children_list[i]
+            self.children_length=self.children_length+child[1]+self.margin#両脇にマージンを作成
+            if(self.high_children<child[0]):
+                self.high_children=child[0]
+            if(self.longest_children<child[1]):
+                self.longest_children=child[1]
+        if(self.children_length/2<=self.longest_children):
+            self.children_length=self.longest_children*2#betaとC系が重ならないように180度を超えないように
+        if(self.children_length/(2*math.pi)>head.r+self.high_children+self.margin):
+            self.r=(self.children_length)/(2*math.pi)#betaの円
+        else:
+            self.r=head.r+self.high_children+self.margin
         print("B0_plus was made!.")
 
     def show(self):
         return "b0+("+ self.head.show() +"," + self.tail.show() +")"
 
     def draw(self):
-        pass
+        side_r=self.r+0.5
+        # -r+1≦x≦r+1,-r+1≦y≦r+1の範囲を塗り潰す
+        ax.axvspan(-side_r,side_r,-side_r,side_r,color="gray",alpha = 0.5)
+        draw_circle(self.r,(0,0),circle_fill=True,fc="white")
+        for_children=[]
+        length=0
+        for i in range(0,self.children_list_count):
+            length=length+self.margin
+            for_children.append([length,self.r,(0,0),True])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心、親がB0かどうか
+            child=self.children_list[i]
+            length=length+child[1]
+        print("plot B0_plus.")
+        self.head.draw((0,0))
+        self.tail.draw(for_children)
 
 class B0_minus(Node):
     def __init__(self, head, tail):
@@ -229,13 +267,13 @@ class A2(Node):
         length=0
         for i in range(0,self.c_plus_children_list_count):#plusの子供に与える情報
             length=length+self.margin
-            for_plus_children.append([length,self.center_r,center])
+            for_plus_children.append([length,self.center_r,center,False])
             child=self.c_plus_children_list[i]
             length=length+child[1]
         length=self.len_of_circ/2
         for i in range(0,self.c_minus_children_list_count):#minusの子供に与える情報
             length=length+self.margin
-            for_minus_children.append([length,self.center_r,center])
+            for_minus_children.append([length,self.center_r,center,False])
             child=self.c_minus_children_list[i]
             length=length+child[1]
         print("plot A2.")
@@ -376,7 +414,7 @@ class Beta_plus(Node):
         length=0
         for i in range(0,self.children_list_count):
             length=length+self.margin
-            for_children.append([length,self.center_r,center])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
+            for_children.append([length,self.center_r,center,False])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
             child=self.children_list[i]
             length=length+child[1]
         print("plot Beta_plus.")
@@ -459,7 +497,7 @@ class Beta_minus(Node):
         length=0
         for i in range(0,self.children_list_count):
             length=length+self.margin
-            for_children.append([length,self.center_r,center])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
+            for_children.append([length,self.center_r,center,False])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
             child=self.children_list[i]
             length=length+child[1]
         print("plot Beta_minus.")
@@ -500,19 +538,24 @@ class C_plus(Node):
         self.length=children_list[0]
         self.center_r=children_list[1]
         self.center=children_list[2]
+        self.bool_b0=children_list[3]
         self.start_theta=self.length/self.center_r
-        self.start_point=((self.center_r*math.cos(self.start_theta))+self.center[0],(self.center_r*math.sin(self.start_theta))+self.center[1])
+        self.start_point=theta_point(self.start_theta,self.center_r,self.center)
         self.end_theta=(self.length+self.children_length)/self.center_r
-        self.end_point=((self.center_r*math.cos(self.end_theta))+self.center[0],(self.center_r*math.sin(self.end_theta))+self.center[1])
+        self.end_point=theta_point(self.end_theta,self.center_r,self.center)
         self.high_theta=((self.end_theta-self.start_theta)/2)+self.start_theta
-        self.high_point=(((self.center_r+self.high)*math.cos(self.high_theta))+self.center[0],((self.center_r+self.high)*math.sin(self.high_theta))+self.center[1])
-        self.b_center=((self.center_r+self.high_children+self.circ_margin+self.b_r)*math.cos(self.high_theta)+self.center[0],(self.center_r+self.high_children+self.circ_margin+self.b_r)*math.sin(self.high_theta)+self.center[1])
-        self.b_r_theta=math.pi-((math.pi/2)+self.high_theta)#180-(90+high_theta)bの専有領域の中心を基準に三角関数を適用するための準備
-        self.b_r_center=(((self.b_r+self.circ_margin)*(math.cos(-self.b_r_theta)))+self.b_center[0],((self.b_r+self.circ_margin)*(math.sin(-self.b_r_theta))+self.b_center[1]))#0度の点
-        self.b_l_center=(((self.b_r+self.circ_margin)*(math.cos(math.pi-self.b_r_theta)))+self.b_center[0],((self.b_r+self.circ_margin)*(math.sin(math.pi-self.b_r_theta))+self.b_center[1]))#180度の点
-        self.b_rr_center=(((self.b_r+self.circ_margin)*(math.cos(-self.b_r_theta-(math.pi/6))))+self.b_center[0],((self.b_r+self.circ_margin)*(math.sin(-self.b_r_theta-(math.pi/6)))+self.b_center[1]))#-30度の点
-        self.b_ll_center=(((self.b_r+self.circ_margin)*(math.cos(math.pi-self.b_r_theta+(math.pi/6))))+self.b_center[0],((self.b_r+self.circ_margin)*(math.sin(math.pi-self.b_r_theta+(math.pi/6)))+self.b_center[1]))#210度の点
+        if(self.bool_b0):
+            self.high_point=theta_point(self.high_theta,self.center_r-self.high,self.center)
+            self.b_center=theta_point(self.high_theta,self.center_r-self.high_children-self.circ_margin-self.b_r,self.center)
+        else:
+            self.high_point=theta_point(self.high_theta,self.center_r+self.high,self.center)
+            self.b_center=theta_point(self.high_theta,self.center_r+self.high_children+self.circ_margin+self.b_r,self.center)
         if(self.b_r!=0):
+            self.b_r_theta=math.pi-((math.pi/2)+self.high_theta)#180-(90+high_theta)bの専有領域の中心を基準に三角関数を適用するための準備
+            self.b_r_center=theta_point(-self.b_r_theta,self.b_r+self.circ_margin,self.b_center)#0度の点
+            self.b_l_center=theta_point(math.pi-self.b_r_theta,self.b_r+self.circ_margin,self.b_center)#180度の点
+            self.b_rr_center=theta_point(-self.b_r_theta-(math.pi/6),self.b_r+self.circ_margin,self.b_center)#-30度の点
+            self.b_ll_center=theta_point(math.pi-self.b_r_theta+(math.pi/6),self.b_r+self.circ_margin,self.b_center)#210度の点
             draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
         else:
             draw_spline([self.start_point,self.high_point,self.end_point])
@@ -523,7 +566,7 @@ class C_plus(Node):
         plus_length=self.length
         for i in range(0,self.children_list_count):
             plus_length=plus_length+self.margin/2
-            for_children.append([plus_length,self.center_r,self.center])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
+            for_children.append([plus_length,self.center_r,self.center,self.bool_b0])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
             child=self.children_list[i]
             plus_length=plus_length+child[1]
         print("plot C_plus.")
@@ -565,6 +608,7 @@ class C_minus(Node):
         self.length=children_list[0]
         self.center_r=children_list[1]
         self.center=children_list[2]
+        self.bool_b0=children_list[3]
         self.start_theta=self.length/self.center_r
         self.start_point=((self.center_r*math.cos(self.start_theta))+self.center[0],(self.center_r*math.sin(self.start_theta))+self.center[1])
         self.end_theta=(self.length+self.children_length)/self.center_r
@@ -589,7 +633,7 @@ class C_minus(Node):
         plus_length=self.length
         for i in range(0,self.children_list_count):
             plus_length=plus_length+self.margin/2
-            for_children.append([plus_length,self.center_r,self.center])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
+            for_children.append([plus_length,self.center_r,self.center,self.bool_b0])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
             child=self.children_list[i]
             plus_length=plus_length+child[1]
         print("plot C_minus.")
@@ -607,3 +651,4 @@ class C_minus(Node):
 #a0(cons(a+(be+(cons(c+(l,cons(c-(l,n),n)),cons(c+(l,n),n)))),n))
 #a0(cons(a+(be+(cons(c+(l,n),cons(c+(l,n),n)))),n))
 #a0(cons(a+(be+(cons(c+(b++(b++(b++(be+(cons(c+(l,n),n)),be+(cons(c+(l,n),n))),l),l),cons(c-(l,n),n)),cons(c+(l,n),n)))),n))
+#b0+(l,(cons(c+(l,n),n)))
