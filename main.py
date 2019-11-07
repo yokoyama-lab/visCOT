@@ -10,7 +10,7 @@ class main:
             object.draw()
             print(object.show())
             print("draw successful!")
-            print("save picture or watch in matplotlib:"+"\n"+"if you want to save, please type \"save\""+"\n"+"if you want to show, please type \"watch\"")
+            print("You can save picture or watch in matplotlib:"+"\n"+"If you want to save, please type \"save\"."+"\n"+"If you want to watch, please type \"watch\".")
             type=input(':')
             if(type=="save"):
                 dirname = "flow_picture/"
@@ -21,7 +21,8 @@ class main:
                 flow.show_matplotlib()
             else:
                 pass
+            flow.clear_matplotlib()
         except AttributeError:
-            print("please tpye corect syntax.")
+            print("please tpye correct syntax.")
         except EOFError:
             break
