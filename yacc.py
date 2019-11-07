@@ -101,7 +101,7 @@ parser = yacc.yacc()
 def parse(data):
     return yacc.parse(data)
 
-'''if __name__ == '__main__':
+if __name__ == '__main__':
     while True:
         try:
             s = input('>>> ')
@@ -110,4 +110,4 @@ def parse(data):
         print(parser.parse(s).show())
         parser.parse(s).draw()
         flow.show_matplotlib()
-        break '''
+        break 

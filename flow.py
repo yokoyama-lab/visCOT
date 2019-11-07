@@ -16,7 +16,6 @@ ax.set_aspect('equal')
 
 #matplotlibを表示
 def show_matplotlib():
-    print("draw successful!")
     plt.show()
 
 def save_matplotlib(self):
