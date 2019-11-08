@@ -25,7 +25,9 @@ def save_matplotlib(file_name):
     plt.savefig(file_name)
 
 def clear_matplotlib():
-    plt.clf()
+    #plt.close("all")
+    #plt.clf()
+    #plt.figure()
     plt.cla()
     plt.axis('off')
     ax.set_aspect('equal')
