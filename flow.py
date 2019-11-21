@@ -8,79 +8,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from scipy import interpolate
 
-"""#matplotlibの設定
-plt.figure()
-ax = plt.axes()
-plt.axis('off')
-ax.set_aspect('equal')
-
-#matplotlibを表示
-def show_matplotlib():
-    plt.tight_layout()
-    plt.show()
-
-def save_matplotlib(file_name):
-    print("save picture! ")
-    plt.tight_layout()
-    plt.savefig(file_name)
-
-def clear_matplotlib():
-    #plt.close("all")
-    #plt.clf()
-    #plt.figure()
-    plt.cla()
-    plt.axis('off')
-    ax.set_aspect('equal')
-
-#スプライン補間
-def spline(x,y,point,deg):
-    tck,u = interpolate.splprep([x,y],k=deg,s=0)
-    u = np.linspace(0,1,num=point,endpoint=True)
-    spline = interpolate.splev(u,tck)
-    return spline[0],spline[1]
-
-#スプライン補間関数、引数はx座標y座標のタプルのリスト
-def draw_spline(xy):
-    count = len(xy)
-    x = []
-    y = []
-    for i in range(0,count):
-        a_xy = xy[i]
-        x.append(a_xy[0])
-        y.append(a_xy[1])
-    if(count>=4):
-        a,b = spline(x,y,100,3)
-    elif(count==3):
-        a,b = spline(x,y,100,2)
-    plt.plot(a,b,color="black")
-
-#円描画、引数centerはタプル
-def draw_circle(r,center=(0,0),circle_fill=False,fc="grey"):
-    if(circle_fill):
-        circ=plt.Circle(center,r,ec="black",fc=fc,linewidth=1.5)
-    else:
-        circ=plt.Circle(center,r,ec="black",fill=False,linewidth=1.5)
-    ax.add_patch(circ)
-    ax.plot()
-
-#theta=0で右向きの矢印
-def draw_arrow(center,theta=0):
-    col='k'
-    arst='wedge,tail_width=0.6,shrink_factor=0.5'
-    plt.annotate('',xy=(center[0]+(0.1*math.cos(theta)),center[1]+(0.05*math.sin(theta))),xytext=(center[0]+(0.1*math.cos(math.pi+theta)),center[1]+(0.1*math.sin(math.pi+theta))),arrowprops=dict(arrowstyle=arst,connectionstyle='arc3',facecolor=col,edgecolor=col,shrinkA=0,shrinkB=0))
-
-#zoomした際大きさが変化する点をプロットする関数
-def draw_point(center):
-    plt.plot([center[0]], [center[1]],'k.')
-
-#xy_1からxy_2まで直線を引く関数
-def draw_line(xy_1,xy_2):
-    x_1=xy_1[0]
-    y_1=xy_1[1]
-    x_2=xy_2[0]
-    y_2=xy_2[1]
-    plt.plot([x_1,x_2],[y_1, y_2], 'k-')"""
-
 #半径とthetaと中心点を使って二次元上の点の位置を求める関数
 def theta_point(theta,r,center):
     return ((r*math.cos(theta))+center[0],(r*math.sin(theta))+center[1])
@@ -118,7 +45,7 @@ def make_list_for_c(children,parent_r,parent_center,parent_type,margin,parent_le
 class Matplotlib:
     def __init__(self):
         #matplotlibの設定
-        plt.figure()
+        #plt.figure()
         self.ax = plt.axes()
         plt.axis('off')
         self.ax.set_aspect('equal')
@@ -134,7 +61,7 @@ class Matplotlib:
         plt.savefig(file_name)
 
     def clear_matplotlib(self):
-        #plt.close("all")
+        plt.close("all")
         #plt.clf()
         #plt.figure()
         plt.cla()
@@ -191,7 +118,7 @@ class Matplotlib:
         plt.plot([x_1,x_2],[y_1, y_2], 'k-')
 
     #半径rの周りを塗りつぶす関数
-    def axvspan(r):
+    def axvspan(self,r):
         self.ax.axvspan(-r,r,-r,r,color="gray",alpha = 0.5)
 
 class Node(object, metaclass=abc.ABCMeta):
