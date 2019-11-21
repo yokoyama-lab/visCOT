@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from scipy import interpolate
 
-#matplotlibの設定
+"""#matplotlibの設定
 plt.figure()
 ax = plt.axes()
 plt.axis('off')
@@ -79,7 +79,7 @@ def draw_line(xy_1,xy_2):
     y_1=xy_1[1]
     x_2=xy_2[0]
     y_2=xy_2[1]
-    plt.plot([x_1,x_2],[y_1, y_2], 'k-')
+    plt.plot([x_1,x_2],[y_1, y_2], 'k-')"""
 
 #半径とthetaと中心点を使って二次元上の点の位置を求める関数
 def theta_point(theta,r,center):
@@ -115,7 +115,89 @@ def make_list_for_c(children,parent_r,parent_center,parent_type,margin,parent_le
         length=length+child[1]
     return c_list
 
+class Matplotlib:
+    def __init__(self):
+        #matplotlibの設定
+        plt.figure()
+        self.ax = plt.axes()
+        plt.axis('off')
+        self.ax.set_aspect('equal')
+
+    #matplotlibを表示
+    def show_matplotlib(self):
+        plt.tight_layout()
+        plt.show()
+
+    def save_matplotlib(self,file_name):
+        print("save picture! ")
+        plt.tight_layout()
+        plt.savefig(file_name)
+
+    def clear_matplotlib(self):
+        #plt.close("all")
+        #plt.clf()
+        #plt.figure()
+        plt.cla()
+        plt.axis('off')
+        self.ax.set_aspect('equal')
+
+    #スプライン補間
+    def spline(self,x,y,point,deg):
+        tck,u = interpolate.splprep([x,y],k=deg,s=0)
+        u = np.linspace(0,1,num=point,endpoint=True)
+        spline = interpolate.splev(u,tck)
+        return spline[0],spline[1]
+
+    #スプライン補間関数、引数はx座標y座標のタプルのリスト
+    def draw_spline(self,xy):
+        count = len(xy)
+        x = []
+        y = []
+        for i in range(0,count):
+            a_xy = xy[i]
+            x.append(a_xy[0])
+            y.append(a_xy[1])
+        if(count>=4):
+            a,b = self.spline(x,y,100,3)
+        elif(count==3):
+            a,b = self.spline(x,y,100,2)
+        plt.plot(a,b,color="black")
+
+    #円描画、引数centerはタプル
+    def draw_circle(self,r,center=(0,0),circle_fill=False,fc="grey"):
+        if(circle_fill):
+            circ=plt.Circle(center,r,ec="black",fc=fc,linewidth=1.5)
+        else:
+            circ=plt.Circle(center,r,ec="black",fill=False,linewidth=1.5)
+        self.ax.add_patch(circ)
+        self.ax.plot()
+
+    #theta=0で右向きの矢印
+    def draw_arrow(self,center,theta=0):
+        col='k'
+        arst='wedge,tail_width=0.6,shrink_factor=0.5'
+        plt.annotate('',xy=(center[0]+(0.1*math.cos(theta)),center[1]+(0.05*math.sin(theta))),xytext=(center[0]+(0.1*math.cos(math.pi+theta)),center[1]+(0.1*math.sin(math.pi+theta))),arrowprops=dict(arrowstyle=arst,connectionstyle='arc3',facecolor=col,edgecolor=col,shrinkA=0,shrinkB=0))
+
+    #zoomした際大きさが変化する点をプロットする関数
+    def draw_point(self,center):
+        plt.plot([center[0]], [center[1]],'k.')
+
+    #xy_1からxy_2まで直線を引く関数
+    def draw_line(self,xy_1,xy_2):
+        x_1=xy_1[0]
+        y_1=xy_1[1]
+        x_2=xy_2[0]
+        y_2=xy_2[1]
+        plt.plot([x_1,x_2],[y_1, y_2], 'k-')
+
+    #半径rの周りを塗りつぶす関数
+    def axvspan(r):
+        self.ax.axvspan(-r,r,-r,r,color="gray",alpha = 0.5)
+
 class Node(object, metaclass=abc.ABCMeta):
+    matplotlib = None
+    head = None
+    tail = None
     @abc.abstractmethod
     def __init__(self):
         pass
@@ -125,6 +207,13 @@ class Node(object, metaclass=abc.ABCMeta):
 
     def draw(self):
         pass
+
+    def set_matplotlib(self,matplotlib):
+        self.matplotlib = matplotlib
+        if self.head is not None:
+            self.head.set_matplotlib(matplotlib)
+        if self.tail is not None:
+            self.tail.set_matplotlib(matplotlib)
 
    # def parse(self):            # PLYでparseを作成するのではなく，このメソッドを実装してparserを作っても良い．
     #    pass
@@ -142,7 +231,7 @@ class A0(Node):
         children_data=[] #drawで引数として渡す
         count_r=0
         if(self.head.type=="Nil"):
-            draw_line((-1,0),(1,0)) #一様流を書く
+            self.matplotlib.draw_line((-1,0),(1,0)) #一様流を書く
         else:
             for child in self.children_list: #子供達の中で一番長いrを求める
                 if(child[0]>long_child):
@@ -151,16 +240,17 @@ class A0(Node):
             for child in self.children_list:
                 children_data.append((0,-count_r)) #子供それぞれについて中心点を作成して配列に格納
                 if(child[1]=="A2"):
-                    draw_line((-edge,-count_r),(-child[0],-count_r))
-                    draw_line((child[0],-count_r),(edge,-count_r))
+                    self.matplotlib.draw_line((-edge,-count_r),(-child[0],-count_r))
+                    self.matplotlib.draw_line((child[0],-count_r),(edge,-count_r))
                 elif(child[1]=="A_minus"):
-                    draw_line((-edge,-count_r+child[0]),(edge,-count_r+child[0]))
+                    self.matplotlib.draw_line((-edge,-count_r+child[0]),(edge,-count_r+child[0]))
                 else:
-                    draw_line((-edge,-count_r-child[0]),(edge,-count_r-child[0]))
+                    self.matplotlib.draw_line((-edge,-count_r-child[0]),(edge,-count_r-child[0]))
                 count_r=count_r+child[0]*2+self.margin*2 #次の子供の中心点をy軸に-r*2して繰り返す
         #print("plot A0.")
         self.head.draw(children_data)
         #return center#子に与える中心点
+        print(self.matplotlib)
 
     def show(self):
         return "a0("+ self.head.show() +")"
@@ -182,8 +272,8 @@ class B0_plus(Node):
 
     def draw(self):
         side_r=self.r+self.margin
-        ax.axvspan(-side_r,side_r,-side_r,side_r,color="gray",alpha = 0.5)#self.rの周りを塗り潰す
-        draw_circle(self.r,(0,0),circle_fill=True,fc="white")
+        self.matplotlib.axvspan(side_r)
+        self.matplotlib.draw_circle(self.r,(0,0),circle_fill=True,fc="white")
         for_children=make_list_for_c(self.children_list,self.r,(0,0),True,self.margin)
         #print("plot B0_plus.")
         self.head.draw((0,0))
@@ -210,8 +300,8 @@ class B0_minus(Node):
 
     def draw(self):
         side_r=self.r+self.margin
-        ax.axvspan(-side_r,side_r,-side_r,side_r,color="gray",alpha = 0.5)#self.rの周りを塗り潰す
-        draw_circle(self.r,(0,0),circle_fill=True,fc="white")
+        self.matplotlib.axvspan(side_r)
+        self.matplotlib.draw_circle(self.r,(0,0),circle_fill=True,fc="white")
         for_children=make_list_for_c(self.children_list,self.r,(0,0),True,self.margin)
         #print("plot B0_plus.")
         self.head.draw((0,0))
@@ -231,11 +321,12 @@ class A_plus(Node):
         #print("A_plus was made!")
 
     def draw(self,center):#描画する際に親から与える中心点
-        draw_circle(self.r ,center)
-        draw_arrow((center[0]-self.r,center[1]),theta=math.radians(270))
-        draw_arrow((center[0]+self.r,center[1]),theta=math.radians(90))
+        self.matplotlib.draw_circle(self.r ,center)
+        self.matplotlib.draw_arrow((center[0]-self.r,center[1]),theta=math.radians(270))
+        self.matplotlib.draw_arrow((center[0]+self.r,center[1]),theta=math.radians(90))
         #print("plot A_plus.")
         self.head.draw(center)
+        print(self.matplotlib)
 
     def show(self):
         return "a+(" + self.head.show() + ")"
@@ -250,9 +341,9 @@ class A_minus(Node):
         #print("A_minus was made!")
 
     def draw(self,center):#描画する際に親から与える中心点
-        draw_circle(self.r ,center)
-        draw_arrow((center[0]-self.r,center[1]),theta=math.radians(90))
-        draw_arrow((center[0]+self.r,center[1]),theta=math.radians(270))
+        self.matplotlib.draw_circle(self.r ,center)
+        self.matplotlib.draw_arrow((center[0]-self.r,center[1]),theta=math.radians(90))
+        self.matplotlib.draw_arrow((center[0]+self.r,center[1]),theta=math.radians(270))
         #print("plot A_minus.")
         self.head.draw(center)
 
@@ -280,11 +371,11 @@ class A2(Node):
         self.child=[(self.r,self.type)]
 
     def draw(self,center):
-        draw_circle(self.center_r,center,circle_fill=True)#a_2の描画
-        draw_point((center[0]+self.center_r,center[1]))#一様流との交点の描画(右)
-        draw_point((center[0]-self.center_r,center[1]))#一様流との交点の描画(左)
-        draw_line((center[0]-self.r,center[1]),(center[0]-self.center_r,center[1]))
-        draw_line((center[0]+self.center_r,center[1]),(center[0]+self.r,center[1]))
+        self.matplotlib.draw_circle(self.center_r,center,circle_fill=True)#a_2の描画
+        self.matplotlib.draw_point((center[0]+self.center_r,center[1]))#一様流との交点の描画(右)
+        self.matplotlib.draw_point((center[0]-self.center_r,center[1]))#一様流との交点の描画(左)
+        self.matplotlib.draw_line((center[0]-self.r,center[1]),(center[0]-self.center_r,center[1]))
+        self.matplotlib.draw_line((center[0]+self.center_r,center[1]),(center[0]+self.r,center[1]))
         for_plus_children=make_list_for_c(self.head.child,self.center_r,center,False,self.margin)
         for_minus_children=make_list_for_c(self.tail.child,self.center_r,center,False,self.margin,parent_length=self.len_of_circ/2)
         #print("plot A2.")
@@ -322,6 +413,7 @@ class Cons(Node):
             else:
                 self.tail.draw((0,0))
         #print("plot Cons.")
+        print(self.matplotlib)
 
     def show(self):
         return "cons(" + self.head.show() + ", " + self.tail.show() + ")"
@@ -361,11 +453,11 @@ class B_plus_plus(Node):
         #print("B_plus_plus was made!")
 
     def draw(self,center=(0,0)):#描画する際に親から与える中心点
-        draw_point((center[0],self.l_down_r+center[1]-self.l_up_r))#２つの円の交点
-        draw_circle(self.l_up_r+self.margin,(center[0],self.l_down_r+self.margin+center[1]))#上の円
-        draw_circle(self.l_down_r+self.margin,(center[0],-self.l_up_r-self.margin+center[1]))#下の円
-        draw_arrow((center[0],self.l_down_r+2*self.margin+center[1]+self.l_up_r),math.radians(0))#上の円の矢印
-        draw_arrow((center[0],-self.l_up_r-2*self.margin+center[1]-self.l_down_r),math.radians(180))#下の円の矢印
+        self.matplotlib.draw_point((center[0],self.l_down_r+center[1]-self.l_up_r))#２つの円の交点
+        self.matplotlib.draw_circle(self.l_up_r+self.margin,(center[0],self.l_down_r+self.margin+center[1]))#上の円
+        self.matplotlib.draw_circle(self.l_down_r+self.margin,(center[0],-self.l_up_r-self.margin+center[1]))#下の円
+        self.matplotlib.draw_arrow((center[0],self.l_down_r+2*self.margin+center[1]+self.l_up_r),math.radians(0))#上の円の矢印
+        self.matplotlib.draw_arrow((center[0],-self.l_up_r-2*self.margin+center[1]-self.l_down_r),math.radians(180))#下の円の矢印
         #print("plot B_plus_plus.")
         self.head.draw((center[0],self.l_down_r+self.margin+center[1]))
         self.tail.draw((center[0],-self.l_up_r-self.margin+center[1]))
@@ -384,11 +476,11 @@ class B_plus_minus(Node):
         #print("B_plus_minus was made!")
 
     def draw(self,center=(0,0)):#描画する際に親から与える中心点
-        draw_circle(self.l_up_r+self.margin,(center[0],self.l_down_r+self.margin+center[1]))
-        draw_circle(self.l_up_r+self.l_down_r+2*self.margin,(center[0],center[1]))
-        draw_point((center[0],self.l_down_r+self.margin+center[1]+self.l_up_r+self.margin))
-        draw_arrow((center[0],self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin),theta=math.radians(180))
-        draw_arrow((center[0],center[1]-(self.l_up_r+self.l_down_r+2*self.margin)))
+        self.matplotlib.draw_circle(self.l_up_r+self.margin,(center[0],self.l_down_r+self.margin+center[1]))
+        self.matplotlib.draw_circle(self.l_up_r+self.l_down_r+2*self.margin,(center[0],center[1]))
+        self.matplotlib.draw_point((center[0],self.l_down_r+self.margin+center[1]+self.l_up_r+self.margin))
+        self.matplotlib.draw_arrow((center[0],self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin),theta=math.radians(180))
+        self.matplotlib.draw_arrow((center[0],center[1]-(self.l_up_r+self.l_down_r+2*self.margin)))
         #print("plot B_plus_minus.")
         self.head.draw((center[0],self.l_down_r+self.margin+center[1]))
         self.tail.draw((center[0],-self.l_up_r-self.margin+center[1]))
@@ -407,7 +499,7 @@ class Beta_plus(Node):
         #print("Beta_plus was made!")
 
     def draw(self,center):
-        draw_circle(self.center_r,center,circle_fill=True)
+        self.matplotlib.draw_circle(self.center_r,center,circle_fill=True)
         for_children=make_list_for_c(self.head.child,self.center_r,center,False,self.margin)
         #print("plot Beta_plus.")
         self.head.draw(for_children)
@@ -424,11 +516,11 @@ class B_minus_minus(Node):
         #print("B_minus_minus was made!")
 
     def draw(self,center=(0,0)):#描画する際に親から与える中心点
-        draw_point((center[0],self.tail.r+center[1]-self.head.r))#２つの円の交点
-        draw_circle(self.head.r+self.margin,(center[0],self.tail.r+self.margin+center[1]))#上の円
-        draw_circle(self.tail.r+self.margin,(center[0],-self.head.r-self.margin+center[1]))#下の円
-        draw_arrow((center[0],self.tail.r+2*self.margin+center[1]+self.head.r),math.radians(180))#上の円の矢印
-        draw_arrow((center[0],-self.head.r-2*self.margin+center[1]-self.tail.r),math.radians(0))#下の円の矢印
+        self.matplotlib.draw_point((center[0],self.tail.r+center[1]-self.head.r))#２つの円の交点
+        self.matplotlib.draw_circle(self.head.r+self.margin,(center[0],self.tail.r+self.margin+center[1]))#上の円
+        self.matplotlib.draw_circle(self.tail.r+self.margin,(center[0],-self.head.r-self.margin+center[1]))#下の円
+        self.matplotlib.draw_arrow((center[0],self.tail.r+2*self.margin+center[1]+self.head.r),math.radians(180))#上の円の矢印
+        self.matplotlib.draw_arrow((center[0],-self.head.r-2*self.margin+center[1]-self.tail.r),math.radians(0))#下の円の矢印
         #print("plot B_minus_minus.")
         self.head.draw((center[0],self.tail.r+self.margin+center[1]))
         self.tail.draw((center[0],-self.head.r-self.margin+center[1]))
@@ -450,11 +542,11 @@ class B_minus_plus(Node):
         return "b-+(" + self.head.show() + ',' + self.tail.show() + ")"
 
     def draw(self,center=(0,0)):#描画する際に親から与える中心点
-        draw_circle(self.l_up_r+self.margin,(center[0],self.l_down_r+self.margin+center[1]))
-        draw_circle(self.l_up_r+self.l_down_r+2*self.margin,(center[0],center[1]))
-        draw_point((center[0],self.l_down_r+self.margin+center[1]+self.l_up_r+self.margin))
-        draw_arrow((center[0],self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin),theta=math.radians(0))
-        draw_arrow((center[0],center[1]-(self.l_up_r+self.l_down_r+2*self.margin)),theta=math.radians(180))
+        self.matplotlib.draw_circle(self.l_up_r+self.margin,(center[0],self.l_down_r+self.margin+center[1]))
+        self.matplotlib.draw_circle(self.l_up_r+self.l_down_r+2*self.margin,(center[0],center[1]))
+        self.matplotlib.draw_point((center[0],self.l_down_r+self.margin+center[1]+self.l_up_r+self.margin))
+        self.matplotlib.draw_arrow((center[0],self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin),theta=math.radians(0))
+        self.matplotlib.draw_arrow((center[0],center[1]-(self.l_up_r+self.l_down_r+2*self.margin)),theta=math.radians(180))
         #print("plot B_minus_plus.")
         self.head.draw((center[0],self.l_down_r+self.margin+center[1]))
         self.tail.draw((center[0],-self.l_up_r-self.margin+center[1]))
@@ -470,7 +562,7 @@ class Beta_minus(Node):
         #print("Beta_minus was made!")
 
     def draw(self,center):
-        draw_circle(self.center_r,center,circle_fill=True)
+        self.matplotlib.draw_circle(self.center_r,center,circle_fill=True)
         for_children=make_list_for_c(self.head.child,self.center_r,center,False,self.margin)
         #print("plot Beta_minus.")
         self.head.draw(for_children)
@@ -517,12 +609,12 @@ class C_plus(Node):
             self.b_l_center=theta_point(math.pi-self.b_r_theta,self.head.r+self.circ_margin,self.b_center)#180度の点
             self.b_rr_center=theta_point(-self.b_r_theta-(math.pi/6),self.head.r+self.circ_margin,self.b_center)#-30度の点
             self.b_ll_center=theta_point(math.pi-self.b_r_theta+(math.pi/6),self.head.r+self.circ_margin,self.b_center)#210度の点
-            draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
+            self.matplotlib.draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
         else:
-            draw_spline([self.start_point,self.high_point,self.end_point])
-        draw_point(self.start_point)
-        draw_point(self.end_point)
-        draw_arrow(self.high_point,self.high_theta+math.radians(90))
+            self.matplotlib.draw_spline([self.start_point,self.high_point,self.end_point])
+        self.matplotlib.draw_point(self.start_point)
+        self.matplotlib.draw_point(self.end_point)
+        self.matplotlib.draw_arrow(self.high_point,self.high_theta+math.radians(90))
         for_children=make_list_for_c(self.tail.child,self.center_r,self.center,self.bool_b0,self.margin/2,parent_length=self.length)
         #print("plot C_plus.")
         self.head.draw(self.b_center)
@@ -582,12 +674,12 @@ class C_minus(Node):
         self.b_ll_center=(((self.b_r+self.circ_margin)*(math.cos(math.pi-self.b_r_theta+(math.pi/6))))+self.b_center[0],((self.b_r+self.circ_margin)*(math.sin(math.pi-self.b_r_theta+(math.pi/6)))+self.b_center[1]))#210度の点
 
         if(self.b_r!=0):
-            draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
+            self.matplotlib.draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
         else:
-            draw_spline([self.start_point,self.high_point,self.end_point])
-        draw_point(self.start_point)
-        draw_point(self.end_point)
-        draw_arrow(self.high_point,self.high_theta+math.radians(270))
+            self.matplotlib.draw_spline([self.start_point,self.high_point,self.end_point])
+        self.matplotlib.draw_point(self.start_point)
+        self.matplotlib.draw_point(self.end_point)
+        self.matplotlib.draw_arrow(self.high_point,self.high_theta+math.radians(270))
         for_children=[]
         plus_length=self.length
         for i in range(0,self.children_list_count):

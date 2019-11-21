@@ -1,12 +1,21 @@
 import flow
 import yacc
 import os
+from flow import Matplotlib
+
+import math
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+from scipy import interpolate
 
 class main:
     while True:
         try:
             s = input('>>> ')
             object=yacc.parser.parse(s)
+            matplotlib = Matplotlib()
+            object.set_matplotlib(matplotlib)
             object.draw()
             print(object.show())
             print("draw successful!")
@@ -16,12 +25,12 @@ class main:
                 dirname = "flow_picture/"
                 os.makedirs(dirname, exist_ok=True)
                 filename = dirname+s+'.png'
-                flow.save_matplotlib(filename)
+                matplotlib.save_matplotlib(filename)
             elif(type=="watch"):
-                flow.show_matplotlib()
+                matplotlib.show_matplotlib()
             else:
                 pass
-            flow.clear_matplotlib()
+            matplotlib.clear_matplotlib()
         except AttributeError:
             print("please tpye correct syntax.")
         except EOFError:
