@@ -31,7 +31,7 @@ class main:
             else:
                 pass
             matplotlib.clear_matplotlib()
-        except AttributeError:
-            print("please tpye correct syntax.")
+        #except AttributeError:
+            #print("please tpye correct syntax.")
         except EOFError:
             break
