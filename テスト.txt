@@ -1,0 +1,168 @@
+木表現
+
+#a0(n)
+
+左広がりのみ（描画４まで）
+
+#a0(cons(a+(l),n))
+#a0(cons(a-(l),n))
+#a0(cons(a2(n,n),n))
+
+#a0(cons(a+(b++(l,l)),n))
+#a0(cons(a+(b+-(l,l)),n))
+#a0(cons(a+(be+(n)),n))
+
+#a0(cons(a-(b--(l,l)),n))
+#a0(cons(a-(b-+(l,l)),n))
+#a0(cons(a-(be-(n)),n))
+
+#a0(cons(a2(cons(c+(l,n),n),n),n))
+
+#a0(cons(a+(b++(b++(l,l),l)),n))
+#a0(cons(a+(b++(b+-(l,l),l)),n))
+#a0(cons(a+(b++(be+(n),l)),n))
+#a0(cons(a+(b+-(b++(l,l),l)),n))
+#a0(cons(a+(b+-(b+-(l,l),l)),n))
+#a0(cons(a+(b+-(be+(n),l)),n))
+#a0(cons(a+(be+(cons(c+(l,n),n))),n))                  cons(c+(l,n),n)
+
+#a0(cons(a-(b--(b--(l,l),l)),n))
+#a0(cons(a-(b--(b-+(l,l),l)),n))
+#a0(cons(a-(b--(be-(n),l)),n))
+#a0(cons(a-(b-+(b--(l,l),l)),n))
+#a0(cons(a-(b-+(b-+(l,l),l)),n))
+#a0(cons(a-(b-+(be-(n),l)),n))　　
+#a0(cons(a-(be-(cons(c-(l,n),n))),n))
+
+#a0(cons(a2(cons(c+(b++(l,l),n),n),n),n))          b++(l,l)
+#a0(cons(a2(cons(c+(b+-(l,l),n),n),n),n))
+#a0(cons(a2(cons(c+(be+(n),n),n),n),n)) 
+
+___________________________________________________________________________________
+
+右広がりのみ（描画4）
+
+#a0(cons(a+(l),cons(a+(l),n)))              cons(a+(l),n)
+#a0(cons(a+(l),cons(a-(l),n)))              cons(a-(l),n)
+#a0(cons(a+(l),cons(a2(n,n),n)))            cons(a2(n,n),n)
+
+#a0(cons(a-(l),cons(a+(l),n)))
+#a0(cons(a-(l),cons(a-(l),n)))
+#a0(cons(a-(l),cons(a2(n,n),n)))               
+
+#a0(cons(a2(n,n),cons(a+(l),n)))
+#a0(cons(a2(n,n),cons(a-(l),n)))
+#a0(cons(a2(n,n),cons(a2(n,n),n)))
+
+#a0(cons(a+(l),cons(a+(l),cons(a+(l),n))))
+#a0(cons(a+(l),cons(a+(l),cons(a-(l),n))))
+#a0(cons(a+(l),cons(a+(l),cons(a2(n,n),n))))
+#a0(cons(a+(l),cons(a-(l),cons(a+(l),n))))
+#a0(cons(a+(l),cons(a-(l),cons(a-(l),n))))
+#a0(cons(a+(l),cons(a-(l),cons(a2(n,n),n))))
+#a0(cons(a+(l),cons(a2(n,n),cons(a+(l),n))))
+#a0(cons(a+(l),cons(a2(n,n),cons(a-(l),n))))
+#a0(cons(a+(l),cons(a2(n,n),cons(a2(n,n),n))))
+
+#a0(cons(a-(l),cons(a+(l),cons(a+(l),n))))
+#a0(cons(a-(l),cons(a+(l),cons(a-(l),n))))
+#a0(cons(a-(l),cons(a+(l),cons(a2(n,n),n))))
+#a0(cons(a-(l),cons(a-(l),cons(a+(l),n))))
+#a0(cons(a-(l),cons(a-(l),cons(a-(l),n))))
+#a0(cons(a-(l),cons(a-(l),cons(a2(n,n),n))))
+#a0(cons(a-(l),cons(a2(n,n),cons(a+(l),n))))
+#a0(cons(a-(l),cons(a2(n,n),cons(a-(l),n))))
+#a0(cons(a-(l),cons(a2(n,n),cons(a2(n,n),n))))
+                                                     
+#a0(cons(a2(n,n),cons(a+(l),cons(a+(l),n))))
+#a0(cons(a2(n,n),cons(a+(l),cons(a-(l),n))))
+#a0(cons(a2(n,n),cons(a+(l),cons(a2(n,n),n))))
+#a0(cons(a2(n,n),cons(a-(l),cons(a+(l),n))))
+#a0(cons(a2(n,n),cons(a-(l),cons(a-(l),n))))
+#a0(cons(a2(n,n),cons(a-(l),cons(a2(n,n),n))))
+#a0(cons(a2(n,n),cons(a2(n,n),cons(a+(l),n))))
+#a0(cons(a2(n,n),cons(a2(n,n),cons(a-(l),n))))
+#a0(cons(a2(n,n),cons(a2(n,n),cons(a2(n,n),n))))
+
+_____________________________________________________________________
+
+左　右
+#a0(cons(a+(b++(l,l)),cons(a+(l),n)))
+#a0(cons(a+(b++(l,l)),cons(a-(l),n)))
+#a0(cons(a+(b++(l,l)),cons(a2(n,n),n)))
+#a0(cons(a+(b+-(l,l)),cons(a+(l),n)))
+#a0(cons(a+(b+-(l,l)),cons(a-(l),n)))
+#a0(cons(a+(b+-(l,l)),cons(a2(n,n),n)))
+#a0(cons(a+(be+(n)),cons(a+(l),n)))
+#a0(cons(a+(be+(n)),cons(a-(l),n)))
+#a0(cons(a+(be+(n)),cons(a2(n,n),n)))
+
+#a0(cons(a-(b--(l,l)),cons(a+(l),n)))
+#a0(cons(a-(b--(l,l)),cons(a-(l),n)))
+#a0(cons(a-(b--(l,l)),cons(a2(n,n),n)))
+#a0(cons(a-(b-+(l,l)),cons(a+(l),n)))
+#a0(cons(a-(b-+(l,l)),cons(a-(l),n)))
+#a0(cons(a-(b-+(l,l)),cons(a2(n,n),n)))
+#a0(cons(a-(be-(n)),cons(a+(l),n)))
+#a0(cons(a-(be-(n)),cons(a-(l),n)))
+#a0(cons(a-(be-(n)),cons(a2(n,n),n)))
+
+#a0(cons(a2(cons(c+(l,n),n),n),cons(a+(l),n)))
+#a0(cons(a2(cons(c+(l,n),n),n),cons(a-(l),n)))
+#a0(cons(a2(cons(c+(l,n),n),n),cons(a2(n,n),n)))
+
+\\________________________________________________________
+
+#a0(cons(a+(b++(b++(l,l),l)),cons(a+(l),n)))
+#a0(cons(a+(b++(b++(l,l),l)),cons(a-(l),n)))
+#a0(cons(a+(b++(b++(l,l),l)),cons(a2(n,n),n)))
+#a0(cons(a+(b++(b+-(l,l),l)),cons(a+(l),n)))
+#a0(cons(a+(b++(b+-(l,l),l)),cons(a-(l),n)))
+#a0(cons(a+(b++(b+-(l,l),l)),cons(a2(n,n),n)))
+#a0(cons(a+(b++(be+(n),l)),cons(a+(l),n)))
+#a0(cons(a+(b++(be+(n),l)),cons(a-(l),n)))
+#a0(cons(a+(b++(be+(n),l)),cons(a2(n,n),n)))
+#a0(cons(a+(b+-(b++(l,l),l)),cons(a+(l),n)))
+#a0(cons(a+(b+-(b++(l,l),l)),cons(a-(l),n)))
+#a0(cons(a+(b+-(b++(l,l),l)),cons(a2(n,n),n)))
+#a0(cons(a+(b+-(b+-(l,l),l)),cons(a+(l),n)))
+#a0(cons(a+(b+-(b+-(l,l),l)),cons(a-(l),n)))
+#a0(cons(a+(b+-(b+-(l,l),l)),cons(a2(n,n),n)))
+#a0(cons(a+(b+-(be+(n),l)),cons(a+(l),n)))
+#a0(cons(a+(b+-(be+(n),l)),cons(a-(l),n)))
+#a0(cons(a+(b+-(be+(n),l)),cons(a2(n,n),n)))
+#a0(cons(a+(be+(cons(c+(l,n),n))),cons(a+(l),n)))
+#a0(cons(a+(be+(cons(c+(l,n),n))),cons(a-(l),n)))
+#a0(cons(a+(be+(cons(c+(l,n),n))),cons(a2(n,n),n)))
+
+R #a0(cons(a-(b--(b--(l,l),l)),cons(a+(l),n)))
+R #a0(cons(a-(b--(b--(l,l),l)),cons(a-(l),n)))
+R #a0(cons(a-(b--(b--(l,l),l)),cons(a2(n,n),n)))
+R #a0(cons(a-(b--(b-+(l,l),l)),cons(a+(l),n)))
+R #a0(cons(a-(b--(b-+(l,l),l)),cons(a-(l),n)))
+R #a0(cons(a-(b--(b-+(l,l),l)),cons(a2(n,n),n)))
+R #a0(cons(a-(b--(be-(n),l)),cons(a+(l),n)))
+R #a0(cons(a-(b--(be-(n),l)),cons(a-(l),n)))
+R #a0(cons(a-(b--(be-(n),l)),cons(a2(n,n),n)))
+R #a0(cons(a-(b-+(b--(l,l),l)),cons(a+(l),n)))
+R #a0(cons(a-(b-+(b--(l,l),l)),cons(a-(l),n)))
+R #a0(cons(a-(b-+(b--(l,l),l)),cons(a2(n,n),n)))
+R #a0(cons(a-(b-+(b-+(l,l),l)),cons(a+(l),n)))
+R #a0(cons(a-(b-+(b-+(l,l),l)),cons(a-(l),n)))
+R #a0(cons(a-(b-+(b-+(l,l),l)),cons(a2(n,n),n)))
+R #a0(cons(a-(b-+(be-(n),l)),cons(a+(l),n)))
+R #a0(cons(a-(b-+(be-(n),l)),cons(a-(l),n)))
+R #a0(cons(a-(b-+(be-(n),l)),cons(a2(n,n),n)))
+R #a0(cons(a-(be-(cons(c-(l,n),n))),cons(a+(l),n)))
+R #a0(cons(a-(be-(cons(c-(l,n),n))),cons(a-(l),n)))
+R #a0(cons(a-(be-(cons(c-(l,n),n))),cons(a2(n,n),n)))
+
+#a0(cons(a2(cons(c+(b++(l,l),n),n),n),cons(a+(l),n)))
+#a0(cons(a2(cons(c+(b++(l,l),n),n),n),cons(a-(l),n)))
+#a0(cons(a2(cons(c+(b++(l,l),n),n),n),cons(a2(n,n),n)))
+#a0(cons(a2(cons(c+(b+-(l,l),n),n),n),cons(a+(l),n)))
+#a0(cons(a2(cons(c+(b+-(l,l),n),n),n),cons(a-(l),n)))
+#a0(cons(a2(cons(c+(b+-(l,l),n),n),n),cons(a2(n,n),n)))
+#a0(cons(a2(cons(c+(be+(n),n),n),n),cons(a+(l),n)))
+#a0(cons(a2(cons(c+(be+(n),n),n),n),cons(a-(l),n)))
+#a0(cons(a2(cons(c+(be+(n),n),n),n),cons(a2(n,n),n)))
