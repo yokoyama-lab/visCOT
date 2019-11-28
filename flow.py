@@ -174,7 +174,6 @@ class A0(Node):
                 count_r=count_r+child[0]*2+self.margin*2 #次の子供の中心点をy軸に-r*2して繰り返す
         self.head.draw(children_data)
         #return center#子に与える中心点
-        print(self.matplotlib)
 
     def show(self):
         return "a0("+ self.head.show() +")"
@@ -246,7 +245,6 @@ class A_plus(Node):
         self.matplotlib.draw_arrow((center[0]-self.r,center[1]),theta=math.radians(270))
         self.matplotlib.draw_arrow((center[0]+self.r,center[1]),theta=math.radians(90))
         self.head.draw(center)
-        print(self.matplotlib)
 
     def show(self):
         return "a+(" + self.head.show() + ")"
@@ -330,7 +328,6 @@ class Cons(Node):
                 self.tail.draw(children_list)
             else:
                 self.tail.draw((0,0))
-        print(self.matplotlib)
 
     def show(self):
         return "cons(" + self.head.show() + ", " + self.tail.show() + ")"
