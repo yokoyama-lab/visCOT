@@ -24,8 +24,6 @@ tokens = (
     'C_PLUS',
     'C_MINUS',
 )
-
-t_ignore = ' \t\n'              # 入力を無視する
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_COMMA  = r','
@@ -47,6 +45,7 @@ t_B_MINUS_PLUS = r'b\-\+'
 t_BETA_MINUS = r'be\-'
 t_C_PLUS = r'c\+'
 t_C_MINUS = r'c\-'
+t_ignore = ' \t\n'              # 入力を無視する
 
 # error handling
 def t_error(t):

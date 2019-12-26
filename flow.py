@@ -150,7 +150,6 @@ class A0(Node):
         self.head = head        #抽象構文木の作成
         self.margin = 0.5
         self.children_list=head.child #A0に送られるchildは[r,type]
-
     def draw(self):
         long_child=0
         children_data=[] #drawで引数として渡す
@@ -240,7 +239,6 @@ class A_plus(Node):
         self.margin=0.5#子の専有領域と親の領域の余白
         self.r = head.r + self.margin
         self.child = [(self.r,self.type)]
-
     def draw(self,center):#描画する際に親から与える中心点
         self.matplotlib.draw_circle(self.r ,center)
         self.matplotlib.draw_arrow((center[0]-self.r,center[1]),theta=math.radians(270))
@@ -319,7 +317,7 @@ class Cons(Node):
         if (len(tail.child)!=0):
             for child in tail_child:
                 self.child.append(child)
-
+    
     def draw(self,children_list):
         if(len(children_list)!=0):
             if(isinstance(children_list,tuple)):
@@ -340,7 +338,7 @@ class Nil(Node):
         super().__init__()
         self.type="Nil"
         self.child=([(0,0)])
-
+        
     def show(self):
         return "n"
 
@@ -351,7 +349,7 @@ class Leaf(Node):
     def __init__(self):
         super().__init__()
         self.r=0
-
+        
     def show(self):
         return "l"
 
@@ -368,7 +366,6 @@ class B_plus_plus(Node):
         self.l_up_r = head.r #上の図の占有領域(半径)
         self.l_down_r = tail.r # 下の図の占有領域(半径)
         self.r = (2*self.l_up_r + 2*self.l_down_r + 4*self.margin) / 2 #全体の占有領域(半径)
-
     def draw(self,center=(0,0)):#描画する際に親から与える中心点
         self.matplotlib.draw_point((center[0],self.l_down_r+center[1]-self.l_up_r))#２つの円の交点
         self.matplotlib.draw_circle(self.l_up_r+self.margin,(center[0],self.l_down_r+self.margin+center[1]))#上の円
@@ -497,7 +494,7 @@ class C_plus(Node):
             bottom_length=self.children_length
         self.high=(2*head.r)+self.high_children+self.margin
         self.child=[(self.high,bottom_length)]
-
+        
     def draw(self,children_list):
         self.length=children_list[0]
         self.center_r=children_list[1]
@@ -548,6 +545,7 @@ class C_minus(Node):
         self.children_length=0
         self.high=0
         self.bottom_length=0
+        
         for i in range(0,self.children_list_count):
             child=self.children_list[i]
             self.children_length=self.children_length+child[1]+self.margin
@@ -560,7 +558,8 @@ class C_minus(Node):
         self.high=(2*self.b_r)+self.high_children+self.margin
         self.bool_child=True
         self.child=[(self.high,self.bottom_length)]
-
+        
+        
     def draw(self,children_list):
         self.length=children_list[0]
         self.center_r=children_list[1]

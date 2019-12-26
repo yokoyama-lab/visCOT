@@ -10,11 +10,11 @@ def p_expr_a0(p):
      p[0] = flow.A0(p[3])
 
 def p_expr_b0_plus(p):
-     's : B0_PLUS LPAREN b_plus COMMA LPAREN cs_plus RPAREN RPAREN'
+     's : B0_PLUS LPAREN b_plus COMMA LPAREN cs_minus RPAREN RPAREN'
      p[0] = flow.B0_plus(p[3], p[6])
 
 def p_expr_b0_minus(p):
-     's : B0_MINUS LPAREN b_minus COMMA LPAREN cs_minus RPAREN RPAREN'
+     's : B0_MINUS LPAREN b_minus COMMA LPAREN cs_plus RPAREN RPAREN'
      p[0] = flow.B0_minus(p[3], p[6])
 
 def p_expr_as_nil(p):
