@@ -166,13 +166,18 @@ class A0(Node):
                 if(child[1]=="A2"):
                     self.matplotlib.draw_line((-edge,-count_r),(-child[0],-count_r))
                     self.matplotlib.draw_line((child[0],-count_r),(edge,-count_r))
+                    self.matplotlib.draw_arrow(((-edge-child[0])/2,-count_r),math.radians(180))
+                    self.matplotlib.draw_arrow(((child[0]+edge)/2,-count_r),math.radians(180))
                 elif(child[1]=="A_minus"):
                     self.matplotlib.draw_line((-edge,-count_r+child[0]),(edge,-count_r+child[0]))
+                    self.matplotlib.draw_arrow(((-edge)/2,-count_r+child[0]),math.radians(180))
+                    self.matplotlib.draw_arrow(((edge)/2,-count_r+child[0]),math.radians(180))
                 else:
                     self.matplotlib.draw_line((-edge,-count_r-child[0]),(edge,-count_r-child[0]))
+                    self.matplotlib.draw_arrow(((-edge)/2,-count_r-child[0]),math.radians(180))
+                    self.matplotlib.draw_arrow(((edge)/2,-count_r-child[0]),math.radians(180))
                 count_r=count_r+child[0]*2+self.margin*2 #次の子供の中心点をy軸に-r*2して繰り返す
         self.head.draw(children_data)
-        #return center#子に与える中心点
 
     def show(self):
         return "a0("+ self.head.show() +")"
@@ -315,7 +320,7 @@ class Cons(Node):
         if (len(tail.child)!=0):
             for child in tail_child:
                 self.child.append(child)
-    
+
     def draw(self,children_list):
         if(len(children_list)!=0):
             if(isinstance(children_list,tuple)):
@@ -335,7 +340,7 @@ class Nil(Node):
         super().__init__()
         self.type="Nil"
         self.child=([(0,0)])
-        
+
     def show(self):
         return "n"
 
@@ -346,7 +351,7 @@ class Leaf(Node):
     def __init__(self):
         super().__init__()
         self.r=0
-        
+
     def show(self):
         return "l"
 
@@ -410,6 +415,7 @@ class Beta_plus(Node):
     def draw(self,center):
         self.matplotlib.draw_circle(self.center_r,center,circle_fill=True)
         for_children=make_list_for_c(self.head.child,self.center_r,center,False,self.margin)
+        self.matplotlib.draw_arrow((center[0]+self.center_r,center[1]),math.radians(90))
         self.head.draw(for_children)
 
     def show(self):
@@ -470,6 +476,7 @@ class Beta_minus(Node):
     def draw(self,center):
         self.matplotlib.draw_circle(self.center_r,center,circle_fill=True)
         for_children=make_list_for_c(self.head.child,self.center_r,center,False,self.margin)
+        self.matplotlib.draw_arrow((center[0]+self.center_r,center[1]),math.radians(270))
         self.head.draw(for_children)
 
     def show(self):
@@ -491,7 +498,7 @@ class C_plus(Node):
             bottom_length=self.children_length
         self.high=(2*head.r)+self.high_children+self.margin
         self.child=[(self.high,bottom_length)]
-        
+
     def draw(self,children_list):
         self.length=children_list[0]
         self.center_r=children_list[1]
@@ -542,7 +549,7 @@ class C_minus(Node):
         self.children_length=0
         self.high=0
         self.bottom_length=0
-        
+
         for i in range(0,self.children_list_count):
             child=self.children_list[i]
             self.children_length=self.children_length+child[1]+self.margin
@@ -555,8 +562,8 @@ class C_minus(Node):
         self.high=(2*self.b_r)+self.high_children+self.margin
         self.bool_child=True
         self.child=[(self.high,self.bottom_length)]
-        
-        
+
+
     def draw(self,children_list):
         self.length=children_list[0]
         self.center_r=children_list[1]
