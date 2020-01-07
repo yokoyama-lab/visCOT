@@ -162,6 +162,7 @@ class A0(Node):
                     long_child=child[0]
             edge=long_child+self.margin
             for child in self.children_list:
+                count_r=count_r+child[0]+self.margin #次の子供の中心点をy軸に-r*2して繰り返す
                 children_data.append((0,-count_r)) #子供それぞれについて中心点を作成して配列に格納
                 if(child[1]=="A2"):
                     self.matplotlib.draw_line((-edge,-count_r),(-child[0],-count_r))
@@ -176,7 +177,7 @@ class A0(Node):
                     self.matplotlib.draw_line((-edge,-count_r-child[0]),(edge,-count_r-child[0]))
                     self.matplotlib.draw_arrow(((-edge)/2,-count_r-child[0]),math.radians(180))
                     self.matplotlib.draw_arrow(((edge)/2,-count_r-child[0]),math.radians(180))
-                count_r=count_r+child[0]*2+self.margin*2 #次の子供の中心点をy軸に-r*2して繰り返す
+                count_r=count_r+child[0]+self.margin
         self.head.draw(children_data)
 
     def show(self):
@@ -201,6 +202,7 @@ class B0_plus(Node):
         side_r=self.r+self.margin
         self.matplotlib.axvspan(side_r)
         self.matplotlib.draw_circle(self.r,(0,0),circle_fill=True,fc="white")
+        self.matplotlib.draw_arrow((self.r,0),math.radians(90))
         for_children=make_list_for_c(self.children_list,self.r,(0,0),True,self.margin)
         self.head.draw((0,0))
         self.tail.draw(for_children)
@@ -227,6 +229,7 @@ class B0_minus(Node):
         side_r=self.r+self.margin
         self.matplotlib.axvspan(side_r)
         self.matplotlib.draw_circle(self.r,(0,0),circle_fill=True,fc="white")
+        self.matplotlib.draw_arrow((self.r,0),math.radians(270))
         for_children=make_list_for_c(self.children_list,self.r,(0,0),True,self.margin)
         self.head.draw((0,0))
         self.tail.draw(for_children)
