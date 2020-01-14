@@ -37,10 +37,13 @@ def make_list_for_c(children,parent_r,parent_center,parent_type,margin,parent_le
     c_list=[]
     length=parent_length
     if parent_type and first_child:
+        length = length+0.3
         for child in children:
-            length=length+1
             c_list.append([length,parent_r,parent_center,parent_type])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心、親がB0かどうか
-            length=length+(margin/len(children))-child[1]
+            if length+(margin/len(children))-child[1] < length:
+                length=length+1.5
+            else:
+                length=length+(margin/len(children))-child[1]+1
     else:
         for child in children:
             length=length+margin
@@ -513,6 +516,8 @@ class C_plus(Node):
         self.child=[(self.high,bottom_length)]
 
     def draw(self,children_list):
+        if self.high_children==0:
+            self.high_children=0.3
         self.length=children_list[0]
         self.center_r=children_list[1]
         self.center=children_list[2]
@@ -585,6 +590,8 @@ class C_minus(Node):
 
 
     def draw(self,children_list):
+        if self.high_children==0:
+            self.high_children=0.3
         self.length=children_list[0]
         self.center_r=children_list[1]
         self.center=children_list[2]
