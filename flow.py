@@ -33,13 +33,19 @@ def c_list_circ_length(children,margin): #marginはc同士の間に空けたい�
     return circ_length
 
 #Cをdrawするための配列[[基準点からの距離,親の半径,親の中心,親がB0かどうか],...]を作成する関数
-def make_list_for_c(children,parent_r,parent_center,parent_type,margin,parent_length=0):#parent_lengthは親の円の特定の位置から書き始めたいとき用(a2など)
+def make_list_for_c(children,parent_r,parent_center,parent_type,margin,parent_length=0,first_child=False):#parent_lengthは親の円の特定の位置から書き始めたいとき用(a2など)
     c_list=[]
     length=parent_length
-    for child in children:
-        length=length+margin
-        c_list.append([length,parent_r,parent_center,parent_type])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心、親がB0かどうか
-        length=length+child[1]
+    if parent_type and first_child:
+        for child in children:
+            length=length+1
+            c_list.append([length,parent_r,parent_center,parent_type])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心、親がB0かどうか
+            length=length+(margin/len(children))-child[1]
+    else:
+        for child in children:
+            length=length+margin
+            c_list.append([length,parent_r,parent_center,parent_type])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心、親がB0かどうか
+            length=length+child[1]
     return c_list
 
 class Matplotlib:
@@ -203,7 +209,7 @@ class B0_plus(Node):
         self.matplotlib.axvspan(side_r)
         self.matplotlib.draw_circle(self.r,(0,0),circle_fill=True,fc="white")
         self.matplotlib.draw_arrow((self.r,0),math.radians(90))
-        for_children=make_list_for_c(self.children_list,self.r,(0,0),True,self.margin)
+        for_children=make_list_for_c(self.children_list,self.r,(0,0),True,2*self.r*math.pi,first_child=True)
         self.head.draw((0,0))
         self.tail.draw(for_children)
 
@@ -230,7 +236,7 @@ class B0_minus(Node):
         self.matplotlib.axvspan(side_r)
         self.matplotlib.draw_circle(self.r,(0,0),circle_fill=True,fc="white")
         self.matplotlib.draw_arrow((self.r,0),math.radians(270))
-        for_children=make_list_for_c(self.children_list,self.r,(0,0),True,self.margin)
+        for_children=make_list_for_c(self.children_list,self.r,(0,0),True,2*self.r*math.pi,first_child=True)
         self.head.draw((0,0))
         self.tail.draw(for_children)
 
@@ -413,6 +419,8 @@ class Beta_plus(Node):
         high_children=c_list_high(head.child)
         children_length=c_list_circ_length(head.child,self.margin)
         self.center_r=(children_length)/(2*math.pi)#betaの円
+        if children_length < 1:
+            self.center_r = 2/(2*math.pi)
         self.r=self.center_r+high_children#親に渡す全体の大きさ
 
     def draw(self,center):
@@ -474,6 +482,8 @@ class Beta_minus(Node):
         self.high_children=c_list_high(head.child)
         self.children_length=c_list_circ_length(head.child,self.margin)
         self.center_r=(self.children_length)/(2*math.pi)#betaの円
+        if self.children_length < 1:
+            self.center_r = 2/(2*math.pi)
         self.r=self.center_r+self.high_children#親に渡す全体の大きさ
 
     def draw(self,center):
