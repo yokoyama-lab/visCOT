@@ -524,11 +524,16 @@ class C_plus(Node):
             self.b_r_theta=math.pi-((math.pi/2)+self.high_theta)#180-(90+high_theta)bの専有領域の中心を基準に三角関数を適用するための準備
             self.b_r_center=theta_point(-self.b_r_theta,self.head.r+self.circ_margin,self.b_center)#0度の点
             self.b_l_center=theta_point(math.pi-self.b_r_theta,self.head.r+self.circ_margin,self.b_center)#180度の点
-            self.b_rr_center=theta_point(-self.b_r_theta-(math.pi/6),self.head.r+self.circ_margin,self.b_center)#-30度の点
-            self.b_ll_center=theta_point(math.pi-self.b_r_theta+(math.pi/6),self.head.r+self.circ_margin,self.b_center)#210度の点
+            if self.bool_b0:
+                self.b_rr_center=theta_point(-self.b_r_theta+(math.pi/6),self.head.r+self.circ_margin,self.b_center)#-30度の点
+                self.b_ll_center=theta_point(math.pi-self.b_r_theta-(math.pi/6),self.head.r+self.circ_margin,self.b_center)#210度の点
+            else:
+                self.b_rr_center=theta_point(-self.b_r_theta-(math.pi/6),self.head.r+self.circ_margin,self.b_center)#-30度の点
+                self.b_ll_center=theta_point(math.pi-self.b_r_theta+(math.pi/6),self.head.r+self.circ_margin,self.b_center)#210度の点
             self.matplotlib.draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
         else:
             self.matplotlib.draw_spline([self.start_point,self.high_point,self.end_point])
+
         self.matplotlib.draw_point(self.start_point)
         self.matplotlib.draw_point(self.end_point)
 
@@ -590,8 +595,12 @@ class C_minus(Node):
         self.b_r_theta=math.pi-((math.pi/2)+self.high_theta)#180-(90+high_theta)bの専有領域の中心を基準に三角関数を適用するための準備
         self.b_r_center=(((self.b_r+self.circ_margin)*(math.cos(-self.b_r_theta)))+self.b_center[0],((self.b_r+self.circ_margin)*(math.sin(-self.b_r_theta))+self.b_center[1]))#0度の点
         self.b_l_center=(((self.b_r+self.circ_margin)*(math.cos(math.pi-self.b_r_theta)))+self.b_center[0],((self.b_r+self.circ_margin)*(math.sin(math.pi-self.b_r_theta))+self.b_center[1]))#180度の点
-        self.b_rr_center=(((self.b_r+self.circ_margin)*(math.cos(-self.b_r_theta-(math.pi/6))))+self.b_center[0],((self.b_r+self.circ_margin)*(math.sin(-self.b_r_theta-(math.pi/6)))+self.b_center[1]))#-30度の点
-        self.b_ll_center=(((self.b_r+self.circ_margin)*(math.cos(math.pi-self.b_r_theta+(math.pi/6))))+self.b_center[0],((self.b_r+self.circ_margin)*(math.sin(math.pi-self.b_r_theta+(math.pi/6)))+self.b_center[1]))#210度の点
+        if self.bool_b0:
+            self.b_rr_center=theta_point(-self.b_r_theta+(math.pi/6),self.head.r+self.circ_margin,self.b_center)#-30度の点
+            self.b_ll_center=theta_point(math.pi-self.b_r_theta-(math.pi/6),self.head.r+self.circ_margin,self.b_center)#210度の点
+        else:
+            self.b_rr_center=theta_point(-self.b_r_theta-(math.pi/6),self.head.r+self.circ_margin,self.b_center)#-30度の点
+            self.b_ll_center=theta_point(math.pi-self.b_r_theta+(math.pi/6),self.head.r+self.circ_margin,self.b_center)#210度の点
 
         if(self.b_r!=0):
             self.matplotlib.draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
