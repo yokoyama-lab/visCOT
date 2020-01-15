@@ -513,8 +513,8 @@ class C_plus(Node):
         else:
             bottom_length=self.children_length
         self.high=(2*head.r)+self.high_children+self.margin
-        if self.head.r==0 and len(self.tail.child)!=0:
-            self.high = self.high+3
+        if self.head.r==0 and len(self.tail.child)!=1:
+            self.high = self.high+len(self.tail.child)*1
         self.child=[(self.high,bottom_length)]
 
     def draw(self,children_list):
@@ -588,8 +588,8 @@ class C_minus(Node):
         else:
             self.bottom_length=self.children_length
         self.high=(2*self.b_r)+self.high_children+self.margin
-        if self.head.r==0 and len(self.tail.child)!=0:
-            self.high = self.high+3
+        if self.head.r==0 and len(self.tail.child)!=1:
+            self.high = self.high+len(self.tail.child)*1
         self.bool_child=True
         self.child=[(self.high,self.bottom_length)]
 
