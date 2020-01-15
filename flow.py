@@ -601,8 +601,6 @@ class C_minus(Node):
         self.center_r=children_list[1]
         self.center=children_list[2]
         self.bool_b0=children_list[3]
-        if self.b_r==0 and self.children_list_count==0:
-            self.high = self.high+10
         self.start_theta=self.length/self.center_r
         self.start_point=((self.center_r*math.cos(self.start_theta))+self.center[0],(self.center_r*math.sin(self.start_theta))+self.center[1])
         self.end_theta=(self.length+self.children_length)/self.center_r
