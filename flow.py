@@ -553,7 +553,7 @@ class C_plus(Node):
         self.matplotlib.draw_point(self.start_point)
         self.matplotlib.draw_point(self.end_point)
 
-        for_children=make_list_for_c(self.tail.child,self.center_r,self.center,self.bool_b0,self.margin/2,parent_length=self.length)
+        for_children=make_list_for_c(self.tail.child,self.center_r,self.center,self.bool_b0,self.margin/1.5,parent_length=self.length)
         self.head.draw(self.b_center)
         self.tail.draw(for_children)
 
@@ -631,7 +631,7 @@ class C_minus(Node):
         for_children=[]
         plus_length=self.length
         for i in range(0,self.children_list_count):
-            plus_length=plus_length+self.margin/2
+            plus_length=plus_length+self.margin/1.5
             for_children.append([plus_length,self.center_r,self.center,self.bool_b0])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
             child=self.children_list[i]
             plus_length=plus_length+child[1]
