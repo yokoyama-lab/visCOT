@@ -545,7 +545,8 @@ class C_plus(Node):
             else:
                 self.b_rr_center=theta_point(-self.b_r_theta-(math.pi/6),self.head.r+self.circ_margin,self.b_center)#-30度の点
                 self.b_ll_center=theta_point(math.pi-self.b_r_theta+(math.pi/6),self.head.r+self.circ_margin,self.b_center)#210度の点
-            self.matplotlib.draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
+            #self.matplotlib.draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
+            self.matplotlib.draw_spline([self.start_point,self.b_r_center,self.high_point,self.b_l_center,self.end_point])
         else:
             self.matplotlib.draw_spline([self.start_point,self.high_point,self.end_point])
 
@@ -620,7 +621,8 @@ class C_minus(Node):
             self.b_ll_center=theta_point(math.pi-self.b_r_theta+(math.pi/6),self.head.r+self.circ_margin,self.b_center)#210度の点
 
         if(self.b_r!=0):
-            self.matplotlib.draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
+            self.matplotlib.draw_spline([self.start_point,self.b_r_center,self.high_point,self.b_l_center,self.end_point])
+            #self.matplotlib.draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
         else:
             self.matplotlib.draw_spline([self.start_point,self.high_point,self.end_point])
         self.matplotlib.draw_point(self.start_point)
