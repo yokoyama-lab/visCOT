@@ -423,7 +423,7 @@ class Beta_plus(Node):
         children_length=c_list_circ_length(head.child,self.margin)
         self.center_r=(children_length)/(2*math.pi)#betaの円
         if children_length < 1:
-            self.center_r = 2/(2*math.pi)
+            self.center_r = 4/(2*math.pi)
         self.r=self.center_r+high_children#親に渡す全体の大きさ
 
     def draw(self,center):
