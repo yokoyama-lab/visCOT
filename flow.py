@@ -423,7 +423,7 @@ class Beta_plus(Node):
         children_length=c_list_circ_length(head.child,self.margin)
         self.center_r=(children_length)/(2*math.pi)#betaの円
         if children_length < 1:
-            self.center_r = 2/(2*math.pi)
+            self.center_r = 7/(2*math.pi)
         self.r=self.center_r+high_children#親に渡す全体の大きさ
 
     def draw(self,center):
@@ -486,7 +486,7 @@ class Beta_minus(Node):
         self.children_length=c_list_circ_length(head.child,self.margin)
         self.center_r=(self.children_length)/(2*math.pi)#betaの円
         if self.children_length < 1:
-            self.center_r = 2/(2*math.pi)
+            self.center_r = 7/(2*math.pi)
         self.r=self.center_r+self.high_children#親に渡す全体の大きさ
 
     def draw(self,center):
@@ -509,7 +509,7 @@ class C_plus(Node):
         self.high_children=c_list_high(tail.child)
         self.children_length=c_list_circ_length(tail.child,self.margin)
         if((2*head.r)>self.children_length):
-            bottom_length=head.r#ここについては後で確認すべき
+            bottom_length=head.r*2#ここについては後で確認すべき
         else:
             bottom_length=self.children_length
         self.high=(2*head.r)+self.high_children+self.margin
@@ -548,7 +548,10 @@ class C_plus(Node):
                 self.b_rr_center=theta_point(-self.b_r_theta-(math.pi/6),self.head.r+self.circ_margin,self.b_center)#-30度の点
                 self.b_ll_center=theta_point(math.pi-self.b_r_theta+(math.pi/6),self.head.r+self.circ_margin,self.b_center)#210度の点
             #self.matplotlib.draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
-            self.matplotlib.draw_spline([self.start_point,self.b_r_center,self.high_point,self.b_l_center,self.end_point])
+            if self.head.r*2 < self.children_length/2:
+                self.matplotlib.draw_spline([self.start_point,self.high_point,self.end_point])
+            else:
+                self.matplotlib.draw_spline([self.start_point,self.b_r_center,self.high_point,self.b_l_center,self.end_point])
         else:
             self.matplotlib.draw_spline([self.start_point,self.high_point,self.end_point])
 
@@ -584,7 +587,7 @@ class C_minus(Node):
             if(self.high_children<child[0]):
                 self.high_children=child[0]
         if((2*self.b_r)>self.children_length):
-            self.bottom_length=self.b_r#ここについては後で確認すべき
+            self.bottom_length=self.b_r*2#ここについては後で確認すべき
         else:
             self.bottom_length=self.children_length
         self.high=(2*self.b_r)+self.high_children+self.margin
@@ -625,20 +628,25 @@ class C_minus(Node):
             self.b_ll_center=theta_point(math.pi-self.b_r_theta+(math.pi/6),self.head.r+self.circ_margin,self.b_center)#210度の点
 
         if(self.b_r!=0):
-            self.matplotlib.draw_spline([self.start_point,self.b_r_center,self.high_point,self.b_l_center,self.end_point])
+            if self.b_r*2 < self.children_length/2:
+                self.matplotlib.draw_spline([self.start_point,self.high_point,self.end_point])
+            else:
+                self.matplotlib.draw_spline([self.start_point,self.b_r_center,self.high_point,self.b_l_center,self.end_point])
             #self.matplotlib.draw_spline([self.start_point,self.b_rr_center,self.b_r_center,self.high_point,self.b_l_center,self.b_ll_center,self.end_point])
         else:
             self.matplotlib.draw_spline([self.start_point,self.high_point,self.end_point])
         self.matplotlib.draw_point(self.start_point)
         self.matplotlib.draw_point(self.end_point)
 
-        for_children=[]
+        for_children=make_list_for_c(self.tail.child,self.center_r,self.center,self.bool_b0,self.margin/1.5,parent_length=self.length)
+
+        """for_children=[]
         plus_length=self.length
         for i in range(0,self.children_list_count):
             plus_length=plus_length+self.margin/1.5
             for_children.append([plus_length,self.center_r,self.center,self.bool_b0])#子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心
             child=self.children_list[i]
-            plus_length=plus_length+child[1]
+            plus_length=plus_length+child[1]"""
         self.head.draw(self.b_center)
         self.tail.draw(for_children)
 
