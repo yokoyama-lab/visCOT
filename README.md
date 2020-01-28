@@ -11,7 +11,7 @@
 ## Linux Ubuntuにてインストール例
 + 本プログラムをダウンロード
 ```
-git clone https://github.com/Yoshi0207/Thesis_program.git
+git clone https://github.com/Yoshi0207/Visualization-program-of-tree-representation-of-structurally-stable-incompressible-flow-in-two-dimen.git
 ```
 
 + Python をインストール
