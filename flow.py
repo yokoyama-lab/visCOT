@@ -473,4 +473,3 @@ class C_minus(C_plus):
             self.matplotlib.draw_arrow(high_point, high_theta+math.radians(90))
         else:
             self.matplotlib.draw_arrow(high_point, high_theta+math.radians(270))
-            
