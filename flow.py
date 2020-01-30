@@ -12,11 +12,7 @@ def theta_point(theta, r, center):
 
 # C系の配列[(self.high,self.bottom_length),...]から最も大きい高さを求める関数
 def c_list_high(children):
-    high = 0
-    for child in children:
-        if high < child[0]:
-            high = child[0]
-    return high
+    return max(map(lambda x: x[0], children))
 
 # C系の配列[(self.high,self.bottom_length),...]から円周を求める関数
 def c_list_circ_length(children, margin):  
@@ -24,7 +20,7 @@ def c_list_circ_length(children, margin):
     circ_length = 0  # 円周を保存する変数
     longest_child = 0  # 最も長い子供の長さを保存する変数
     for child in children:
-        circ_length = circ_length + child[1] + margin  # スペース分円周を伸ばす
+        circ_length += child[1]+margin  # スペース分円周を伸ばす
         if longest_child < child[1]:
             longest_child = child[1]
     # もし円周の半分以上の長さを持つ子供がいれば、円周の長さをその子供に合わせる
@@ -39,19 +35,19 @@ def make_list_for_c(children, parent_r, parent_center, parent_type, margin, pare
     c_list = []
     length = parent_length
     if parent_type and first_child:
-        length = length + 0.3
+        length += 0.3
         for child in children:
             # 子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心、親がB0かどうか
             c_list.append([length, parent_r, parent_center, parent_type])
-            if length + (margin / len(children)) - child[1] < length:
-                length = length + 1.5
+            if length+(margin/len(children))-child[1] < length:
+                length += 1.5
             else:
-                length = length + (margin / len(children)) - child[1] + 1
+                length += (margin/len(children))-child[1]+1
     else:
         for child in children:
-            length = length + margin
+            length += margin
             c_list.append([length, parent_r, parent_center, parent_type])  
-            length = length + child[1]
+            length += child[1]
     return c_list
 
 class Matplotlib:
@@ -151,20 +147,21 @@ class A0(Node):
         self.type = "A0"
         self.head = head        # 抽象構文木の作成
         self.margin = 0.5
-        self.children_list = head.child  # A0に送られるchildは[r,type]
     
     def draw(self):
         long_child = 0
         children_data = []  # drawで引数として渡す
         count_r = 0
         if self.head.type == "Nil":
-            self.matplotlib.draw_line((-1, 0), (1, 0))  # 一様流を書く
+            # 一様流を書く
+            self.matplotlib.draw_line((-1, 0), (1, 0))
+            self.matplotlib.draw_arrow((0,0), math.radians(180))  
         else:
-            for child in self.children_list:  # 子供達の中で一番長いrを求める
+            for child in self.head.child:  # 子供達の中で一番長いrを求める
                 if child[0] > long_child:
                     long_child = child[0]
             edge = long_child + self.margin
-            for child in self.children_list:
+            for child in self.head.child:
                 count_r = count_r + child[0] + self.margin  # 次の子供の中心点をy軸に-r*2して繰り返す
                 children_data.append((0, -count_r))  # 子供それぞれについて中心点を作成して配列に格納
                 if child[1] == "A2":
@@ -190,9 +187,8 @@ class B0_plus(Node):
         self.head = head
         self.tail = tail
         self.margin = 0.5
-        self.children_list = tail.child
-        high_children = c_list_high(self.children_list)
-        children_length = c_list_circ_length(self.children_list, self.margin)
+        high_children = c_list_high(tail.child)
+        children_length = c_list_circ_length(tail.child, self.margin)
         if children_length / (2 * math.pi) > head.r + high_children + self.margin:
             self.r = (children_length) / (2 * math.pi)
         else:
@@ -202,24 +198,21 @@ class B0_plus(Node):
         side_r = self.r + self.margin
         self.matplotlib.axvspan(side_r)
         self.matplotlib.draw_circle(self.r, (0, 0), circle_fill=True, fc="white")
-        self.matplotlib.draw_arrow((self.r, 0), math.radians(90))
-        for_children = make_list_for_c(self.children_list, self.r, (0, 0), True, 2*self.r*math.pi, first_child=True)
+        self.plot_arrow()
+        for_children = make_list_for_c(self.tail.child, self.r, (0, 0), True, 2*self.r*math.pi, first_child=True)
         self.head.draw((0, 0))
         self.tail.draw(for_children)
+    
+    def plot_arrow(self):
+        self.matplotlib.draw_arrow((self.r, 0), math.radians(90))
 
 class B0_minus(B0_plus):
     def __init__(self, head, tail):
         super().__init__(head, tail)
         self.type = "B0_minus"
 
-    def draw(self):
-        side_r = self.r + self.margin
-        self.matplotlib.axvspan(side_r)
-        self.matplotlib.draw_circle(self.r, (0, 0), circle_fill=True, fc="white")
+    def plot_arrow(self):
         self.matplotlib.draw_arrow((self.r, 0), math.radians(270))
-        for_children = make_list_for_c(self.children_list, self.r, (0, 0), True, 2*self.r*math.pi, first_child=True)
-        self.head.draw((0, 0))
-        self.tail.draw(for_children)
 
 class A_plus(Node):
     def __init__(self, head):
@@ -232,20 +225,22 @@ class A_plus(Node):
 
     def draw(self, center):  # 描画する際に親から与える中心点
         self.matplotlib.draw_circle(self.r, center)
+        self.plot_arrow(center)
+        self.matplotlib.draw_point((center[0],center[1]-self.r))
+        self.head.draw(center)
+    
+    def plot_arrow(self, center):
         self.matplotlib.draw_arrow((center[0]-self.r, center[1]), theta=math.radians(270))
         self.matplotlib.draw_arrow((center[0]+self.r, center[1]), theta=math.radians(90))
-        self.head.draw(center)
 
 class A_minus(A_plus):
     def __init__(self, head):
         super().__init__(head)
         self.type = "A_minus"
 
-    def draw(self,center):  # 描画する際に親から与える中心点
-        self.matplotlib.draw_circle(self.r, center)
+    def plot_arrow(self, center):
         self.matplotlib.draw_arrow((center[0]-self.r, center[1]), theta=math.radians(90))
         self.matplotlib.draw_arrow((center[0]+self.r, center[1]), theta=math.radians(270))
-        self.head.draw(center)
 
 class A2(Node):
     def __init__(self, head, tail):
@@ -338,10 +333,15 @@ class B_plus_plus(Node):
         self.matplotlib.draw_point((center[0], self.l_down_r+center[1]-self.l_up_r))  # ２つの円の交点
         self.matplotlib.draw_circle(self.l_up_r+self.margin,(center[0], self.l_down_r+self.margin+center[1]))  # 上の円
         self.matplotlib.draw_circle(self.l_down_r+self.margin, (center[0], -self.l_up_r-self.margin+center[1]))  # 下の円
-        self.matplotlib.draw_arrow((center[0], self.l_down_r+2*self.margin+center[1]+self.l_up_r), math.radians(180))  # 上の円の矢印
-        self.matplotlib.draw_arrow((center[0], -self.l_up_r-2*self.margin+center[1]-self.l_down_r), math.radians(0))  # 下の円の矢印
+        self.plot_arrow(center)
         self.head.draw((center[0], self.l_down_r+self.margin+center[1]))
         self.tail.draw((center[0], -self.l_up_r-self.margin+center[1]))
+
+    def plot_arrow(self, center):
+        # 上の円の矢印
+        self.matplotlib.draw_arrow((center[0], self.l_down_r+2*self.margin+center[1]+self.l_up_r), math.radians(180)) 
+        # 下の円の矢印 
+        self.matplotlib.draw_arrow((center[0], -self.l_up_r-2*self.margin+center[1]-self.l_down_r), math.radians(0))  
 
 class B_plus_minus(Node):
     def __init__(self, head, tail):
@@ -357,10 +357,13 @@ class B_plus_minus(Node):
         self.matplotlib.draw_circle(self.l_up_r+self.margin, (center[0], self.l_down_r+self.margin+center[1]))
         self.matplotlib.draw_circle(self.l_up_r+self.l_down_r+2*self.margin, (center[0], center[1]))
         self.matplotlib.draw_point((center[0], self.l_down_r+self.margin+center[1]+self.l_up_r+self.margin))
-        self.matplotlib.draw_arrow((center[0], self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin), theta=math.radians(180))
-        self.matplotlib.draw_arrow((center[0], center[1]-(self.l_up_r+self.l_down_r+2*self.margin)))
+        self.plot_arrow(center)
         self.head.draw((center[0], self.l_down_r+self.margin+center[1]))
         self.tail.draw((center[0], -self.l_up_r-self.margin+center[1]))
+
+    def plot_arrow(self, center):
+        self.matplotlib.draw_arrow((center[0], self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin), theta=math.radians(180))
+        self.matplotlib.draw_arrow((center[0], center[1]-(self.l_up_r+self.l_down_r+2*self.margin)))
 
 class Beta_plus(Node):
     def __init__(self, head):
@@ -377,35 +380,25 @@ class Beta_plus(Node):
     def draw(self, center):
         self.matplotlib.draw_circle(self.center_r, center, circle_fill=True)
         for_children = make_list_for_c(self.head.child, self.center_r, center, False, self.margin)
-        self.matplotlib.draw_arrow((center[0]+self.center_r, center[1]), math.radians(90))
+        self.plot_arrow(center)
         self.head.draw(for_children)
+
+    def plot_arrow(self, center):
+        self.matplotlib.draw_arrow((center[0]+self.center_r, center[1]), math.radians(90))
 
 class B_minus_minus(B_plus_plus):
-    def draw(self, center=(0, 0)):  # 描画する際に親から与える中心点
-        self.matplotlib.draw_point((center[0], self.tail.r+center[1]-self.head.r))  # ２つの円の交点
-        self.matplotlib.draw_circle(self.head.r+self.margin, (center[0], self.tail.r+self.margin+center[1]))  # 上の円
-        self.matplotlib.draw_circle(self.tail.r+self.margin, (center[0], -self.head.r-self.margin+center[1]))  # 下の円
-        self.matplotlib.draw_arrow((center[0], self.tail.r+2*self.margin+center[1]+self.head.r), math.radians(0))# 上の円の矢印
-        self.matplotlib.draw_arrow((center[0],-self.head.r-2*self.margin+center[1]-self.tail.r), math.radians(180))# 下の円の矢印
-        self.head.draw((center[0], self.tail.r+self.margin+center[1]))
-        self.tail.draw((center[0], -self.head.r-self.margin+center[1]))
+    def plot_arrow(self, center):
+        self.matplotlib.draw_arrow((center[0], self.tail.r+2*self.margin+center[1]+self.head.r), math.radians(0))
+        self.matplotlib.draw_arrow((center[0],-self.head.r-2*self.margin+center[1]-self.tail.r), math.radians(180))
 
 class B_minus_plus(B_plus_minus):
-    def draw(self, center=(0, 0)):# 描画する際に親から与える中心点
-        self.matplotlib.draw_circle(self.l_up_r+self.margin, (center[0], self.l_down_r+self.margin+center[1]))
-        self.matplotlib.draw_circle(self.l_up_r+self.l_down_r+2*self.margin, (center[0], center[1]))
-        self.matplotlib.draw_point((center[0], self.l_down_r+self.margin+center[1]+self.l_up_r+self.margin))
+    def plot_arrow(self, center):
         self.matplotlib.draw_arrow((center[0], self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin), theta=math.radians(0))
         self.matplotlib.draw_arrow((center[0], center[1]-(self.l_up_r+self.l_down_r+2*self.margin)), theta=math.radians(180))
-        self.head.draw((center[0], self.l_down_r+self.margin+center[1]))
-        self.tail.draw((center[0], -self.l_up_r-self.margin+center[1]))
 
 class Beta_minus(Beta_plus):
-    def draw(self, center):
-        self.matplotlib.draw_circle(self.center_r, center, circle_fill=True)
-        for_children = make_list_for_c(self.head.child, self.center_r, center, False, self.margin)
+    def plot_arrow(self, center):
         self.matplotlib.draw_arrow((center[0]+self.center_r, center[1]), math.radians(270))
-        self.head.draw(for_children)
 
 class C_plus(Node):
     def __init__(self, head ,tail):
@@ -429,88 +422,55 @@ class C_plus(Node):
     def draw(self, children_list):
         if self.high_children == 0:
             self.high_children = 0.3
-        self.length = children_list[0]
-        self.center_r = children_list[1]
-        self.center = children_list[2]
-        self.bool_b0 = children_list[3]
-        self.start_theta = self.length / self.center_r
-        self.start_point = theta_point(self.start_theta, self.center_r, self.center)
-        self.end_theta = (self.length + self.children_length) / self.center_r
-        self.end_point = theta_point(self.end_theta, self.center_r, self.center)
-        self.high_theta = (self.end_theta-self.start_theta) / 2 + self.start_theta
-        if self.bool_b0:
-            self.high_point = theta_point(self.high_theta, self.center_r-self.high, self.center)
-            self.b_center = theta_point(self.high_theta, self.center_r-self.high_children-self.circ_margin-self.head.r, self.center)
-            self.matplotlib.draw_arrow(self.high_point, self.high_theta+math.radians(270))
+        length = children_list[0]
+        center_r = children_list[1]
+        center = children_list[2]
+        bool_b0 = children_list[3]
+        start_theta = length / center_r
+        start_point = theta_point(start_theta, center_r, center)
+        end_theta = (length + self.children_length) / center_r
+        end_point = theta_point(end_theta, center_r, center)
+        high_theta = (end_theta-start_theta) / 2 + start_theta
+        if bool_b0:
+            high_point = theta_point(high_theta, center_r-self.high, center)
+            b_center = theta_point(high_theta, center_r-self.high_children-self.circ_margin-self.head.r, center)
         else:
-            self.high_point = theta_point(self.high_theta, self.center_r+self.high, self.center)
-            self.b_center = theta_point(self.high_theta, self.center_r+self.high_children+self.circ_margin+self.head.r, self.center)
-            self.matplotlib.draw_arrow(self.high_point, self.high_theta+math.radians(90))
+            high_point = theta_point(high_theta, center_r+self.high, center)
+            b_center = theta_point(high_theta, center_r+self.high_children+self.circ_margin+self.head.r, center)
+        self.plot_arrow(bool_b0, high_point, high_theta)
         if self.head.r != 0:
-            self.b_r_theta = math.pi - ((math.pi / 2) + self.high_theta)  # 180-(90+high_theta)bの専有領域の中心を基準に三角関数を適用するための準備
-            self.b_r_center = theta_point(-self.b_r_theta, self.head.r+self.circ_margin, self.b_center)  # 0度の点
-            self.b_l_center = theta_point(math.pi-self.b_r_theta, self.head.r+self.circ_margin, self.b_center)  # 180度の点
-            if self.bool_b0:
-                self.b_rr_center = theta_point(-self.b_r_theta+(math.pi/6), self.head.r+self.circ_margin, self.b_center)#-30度の点
-                self.b_ll_center = theta_point(math.pi-self.b_r_theta-(math.pi/6), self.head.r+self.circ_margin, self.b_center)#210度の点
-            else:
-                self.b_rr_center = theta_point(-self.b_r_theta-(math.pi/6), self.head.r+self.circ_margin, self.b_center)#-30度の点
-                self.b_ll_center = theta_point(math.pi-self.b_r_theta+(math.pi/6), self.head.r+self.circ_margin, self.b_center)#210度の点
+            # 180-(90+high_theta)bの専有領域の中心を基準に三角関数を適用するための準備
+            b_r_theta = math.pi - ((math.pi / 2) + high_theta)  
+            # 0度の点
+            b_r_center = theta_point(-b_r_theta, self.head.r+self.circ_margin, b_center)  
+            # 180度の点
+            b_l_center = theta_point(math.pi-b_r_theta, self.head.r+self.circ_margin, b_center)  
             if self.head.r * 2 < self.children_length / 2:
-                self.matplotlib.draw_spline([self.start_point, self.high_point, self.end_point])
+                self.matplotlib.draw_spline([start_point, high_point, end_point])
             else:
-                self.matplotlib.draw_spline([self.start_point, self.b_r_center, self.high_point, self.b_l_center, self.end_point])
+                self.matplotlib.draw_spline([start_point, b_r_center, high_point, b_l_center, end_point])
         else:
-            self.matplotlib.draw_spline([self.start_point, self.high_point, self.end_point])
-        self.matplotlib.draw_point(self.start_point)
-        self.matplotlib.draw_point(self.end_point)
-        for_children = make_list_for_c(self.tail.child, self.center_r, self.center, self.bool_b0, self.margin/1.5,parent_length=self.length)
-        self.head.draw(self.b_center)
+            self.matplotlib.draw_spline([start_point, high_point, end_point])
+        self.matplotlib.draw_point(start_point)
+        self.matplotlib.draw_point(end_point)
+        for_children = make_list_for_c(self.tail.child, center_r, center, bool_b0, self.margin/1.5,parent_length=length)
+        self.head.draw(b_center)
         self.tail.draw(for_children)
+    
+    def plot_arrow(self, bool_b0, high_point, high_theta):
+        if bool_b0:
+            self.matplotlib.draw_arrow(high_point, high_theta+math.radians(270))
+        else:
+            self.matplotlib.draw_arrow(high_point, high_theta+math.radians(90))
 
 class C_minus(C_plus):
     def __init__(self, head ,tail):
         super().__init__(head, tail)
         self.type = "C_minus"
 
-    def draw(self,children_list):
-        if self.high_children == 0:
-            self.high_children = 0.3
-        self.length = children_list[0]
-        self.center_r = children_list[1]
-        self.center = children_list[2]
-        self.bool_b0 = children_list[3]
-        self.start_theta = self.length / self.center_r
-        self.start_point = theta_point(self.start_theta, self.center_r, self.center)
-        self.end_theta = (self.length + self.children_length) / self.center_r
-        self.end_point = theta_point(self.end_theta, self.center_r, self.center)
-        self.high_theta = ((self.end_theta - self.start_theta) / 2) + self.start_theta
-        if self.bool_b0:
-            self.high_point = theta_point(self.high_theta, self.center_r-self.high, self.center)
-            self.b_center = theta_point(self.high_theta, self.center_r-self.high_children-self.circ_margin-self.head.r, self.center)
-            self.matplotlib.draw_arrow(self.high_point, self.high_theta+math.radians(90))
+    def plot_arrow(self, bool_b0, high_point, high_theta):
+        if bool_b0:
+            self.matplotlib.draw_arrow(high_point, high_theta+math.radians(90))
         else:
-            self.high_point = theta_point(self.high_theta, self.center_r+self.high, self.center)
-            self.b_center = theta_point(self.high_theta, self.center_r+self.high_children+self.circ_margin+self.head.r, self.center)
-            self.matplotlib.draw_arrow(self.high_point, self.high_theta+math.radians(270))
-        if self.head.r != 0:
-            self.b_r_theta = math.pi - ((math.pi / 2) + self.high_theta)# 180-(90+high_theta)bの専有領域の中心を基準に三角関数を適用するための準備
-            self.b_r_center = theta_point(-self.b_r_theta,self.head.r+self.circ_margin, self.b_center)# 0度の点
-            self.b_l_center = theta_point(math.pi-self.b_r_theta, self.head.r+self.circ_margin, self.b_center)# 180度の点
-            if self.bool_b0:
-                self.b_rr_center = theta_point(-self.b_r_theta+(math.pi/6), self.head.r+self.circ_margin, self.b_center)#-30度の点
-                self.b_ll_center = theta_point(math.pi-self.b_r_theta-(math.pi/6), self.head.r+self.circ_margin, self.b_center)#210度の点
-            else:
-                self.b_rr_center = theta_point(-self.b_r_theta-(math.pi/6), self.head.r+self.circ_margin, self.b_center)#-30度の点
-                self.b_ll_center = theta_point(math.pi-self.b_r_theta+(math.pi/6), self.head.r+self.circ_margin, self.b_center)#210度の点
-            if self.head.r*2 < self.children_length / 2:
-                self.matplotlib.draw_spline([self.start_point, self.high_point, self.end_point])
-            else:
-                self.matplotlib.draw_spline([self.start_point, self.b_r_center, self.high_point, self.b_l_center, self.end_point])
-        else:
-            self.matplotlib.draw_spline([self.start_point, self.high_point, self.end_point])
-        self.matplotlib.draw_point(self.start_point)
-        self.matplotlib.draw_point(self.end_point)
-        for_children = make_list_for_c(self.tail.child, self.center_r, self.center, self.bool_b0, self.margin/1.5, parent_length=self.length)
-        self.head.draw(self.b_center)
-        self.tail.draw(for_children)
+            self.matplotlib.draw_arrow(high_point, high_theta+math.radians(270))
+            
