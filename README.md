@@ -35,6 +35,7 @@ pip3 install PLY
 ## 実行例
 プログラムを起動し，木表現を入力する．
 ```
+cd Visualization-program-of-flow
 python3 main.py
 ```
 
