@@ -259,7 +259,7 @@ class A2(Node):
             self.len_of_circ = len_of_plus_circ * 2
         else:
             self.len_of_circ = len_of_minus_circ * 2
-        self.center_r = self.len_of_circ / 2 * math.pi  # a_2の円の半径
+        self.center_r = self.len_of_circ / (2 * math.pi)  # a_2の円の半径
         self.r = self.center_r + self.high  # 専有領域の半径
         self.child = [(self.r, self.type)]
 
