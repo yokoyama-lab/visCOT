@@ -43,4 +43,4 @@ python3 main.py
 a0(cons(a2(cons(c+(l,n),cons(c+(l,n),n)),cons(c-(l,n),cons(c-(l,n),n))),n))
 ```
 
-入力用の木表現が「テスト.txt」に用意されているので試してみてください．
+入力用の木表現が「test.txt」に用意されているので試してみてください．

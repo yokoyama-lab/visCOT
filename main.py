@@ -17,7 +17,6 @@ class main:
             matplotlib = Matplotlib()
             object.set_matplotlib(matplotlib)
             object.draw()
-            print(object.show())
             print("draw successful!")
             print("You can save picture or watch in matplotlib:"+"\n"+"If you want to save, please type \"save\"."+"\n"+"If you want to watch, please type \"watch\".")
             type = input(':')
