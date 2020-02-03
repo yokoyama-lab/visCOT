@@ -309,7 +309,7 @@ class Nil(Node):
     def __init__(self):
         super().__init__()
         self.type = "Nil"
-        self.child = ([(0, 0)])
+        self.child = [(0, 0)]
 
     def draw(self, center):
         pass
@@ -356,7 +356,7 @@ class B_Flip(Node):
 
     def draw(self, center=(0, 0)):  # 描画する際に親から与える中心点
         self.matplotlib.draw_circle(self.l_up_r+self.margin, (center[0], self.l_down_r+self.margin+center[1]))
-        self.matplotlib.draw_circle(self.l_up_r+self.l_down_r+2*self.margin, (center[0], center[1]))
+        self.matplotlib.draw_circle(self.l_up_r+self.l_down_r+2*self.margin, center)
         self.matplotlib.draw_point((center[0], self.l_down_r+self.margin+center[1]+self.l_up_r+self.margin))
         self.plot_arrow(center)
         self.head.draw((center[0], self.l_down_r+self.margin+center[1]))
@@ -428,7 +428,7 @@ class C(Node):
         bottom_length = max(head.r*2, self.children_length)
         self.high = 2 * head.r + self.high_children + self.margin
         if (self.head.r == 0) and (len(self.tail.child) != 1):
-            self.high = self.high + len(self.tail.child) * 1
+            self.high += len(self.tail.child) * 1
         self.child = [(self.high, bottom_length)]
 
     def draw(self, c_data):
@@ -452,7 +452,7 @@ class C(Node):
         self.plot_arrow(bool_b0, high_point, high_theta)
         if self.head.r != 0:
             # 180-(90+high_theta)bの専有領域の中心を基準に三角関数を適用するための準備
-            b_r_theta = math.pi - ((math.pi / 2) + high_theta)  
+            b_r_theta = math.pi - (math.pi/2+high_theta)  
             # 0度の点
             b_r_center = theta_point(-b_r_theta, self.head.r+self.circ_margin, b_center)
             # 180度の点
@@ -478,10 +478,7 @@ class C_plus(C):
         self.type = "C_plus"
 
     def plot_arrow(self, bool_b0, high_point, high_theta):
-        if bool_b0:
-            self.matplotlib.draw_arrow(high_point, high_theta+math.pi*1.5)
-        else:
-            self.matplotlib.draw_arrow(high_point, high_theta+math.pi/2)
+        self.matplotlib.draw_arrow(high_point, high_theta+ math.pi*(1.5 if bool_b0 else 0.5))
 
 class C_minus(C):
     def __init__(self, head, tail):
@@ -489,7 +486,4 @@ class C_minus(C):
         self.type = "C_minus"
 
     def plot_arrow(self, bool_b0, high_point, high_theta):
-        if bool_b0:
-            self.matplotlib.draw_arrow(high_point, high_theta+math.pi/2)
-        else:
-            self.matplotlib.draw_arrow(high_point, high_theta+math.pi*1.5)
+        self.matplotlib.draw_arrow(high_point, high_theta+ math.pi*(0.5 if bool_b0 else 1.5))
