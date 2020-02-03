@@ -38,7 +38,7 @@ def make_list_for_c(children, parent_r, parent_center, parent_type, margin, pare
         length += 0.3
         for child in children:
             # 子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心、親がB0かどうか
-            c_list.append([length, parent_r, parent_center, parent_type])
+            c_list.append({"length":length, "parent_r":parent_r, "parent_center":parent_center, "parent_type":parent_type})
             if length+(margin/len(children))-child[1] < length:
                 length += 1.5
             else:
@@ -46,7 +46,7 @@ def make_list_for_c(children, parent_r, parent_center, parent_type, margin, pare
     else:
         for child in children:
             length += margin
-            c_list.append([length, parent_r, parent_center, parent_type])
+            c_list.append({"length":length, "parent_r":parent_r, "parent_center":parent_center, "parent_type":parent_type})
             length += child[1]
     return c_list
 
@@ -163,7 +163,7 @@ class A0(Node):
             edge = long_child + self.margin
             for child in self.head.child:
                 # 次の子供の中心点をy軸に-r*2して繰り返す
-                count_r = count_r + child[0] + self.margin
+                count_r += child[0] + self.margin
                 # 子供それぞれについて中心点を作成して配列に格納
                 children_data.append((0, -count_r))
                 if child[1] == "A2":
@@ -179,7 +179,7 @@ class A0(Node):
                     self.matplotlib.draw_line((-edge, -count_r-child[0]), (edge, -count_r-child[0]))
                     self.matplotlib.draw_arrow((-edge/2, -count_r-child[0]), math.pi)
                     self.matplotlib.draw_arrow((edge/2, -count_r-child[0]), math.pi)
-                count_r = count_r + child[0] + self.margin
+                count_r += child[0] + self.margin
         self.head.draw(children_data)
 
 class B0(Node):
@@ -190,10 +190,7 @@ class B0(Node):
         self.margin = 0.5
         high_children = c_list_high(tail.child)
         children_length = c_list_circ_length(tail.child, self.margin)
-        if children_length / (2 * math.pi) > head.r + high_children + self.margin:
-            self.r = children_length / (2 * math.pi)
-        else:
-            self.r = head.r + high_children + self.margin
+        self.r = max(children_length / (2 * math.pi), head.r + high_children + self.margin)
 
     def draw(self):
         side_r = self.r + self.margin
@@ -439,13 +436,13 @@ class C(Node):
             self.high = self.high + len(self.tail.child) * 1
         self.child = [(self.high, bottom_length)]
 
-    def draw(self, children_list):
+    def draw(self, c_data):
         if self.high_children == 0:
             self.high_children = 0.3
-        length = children_list[0]
-        center_r = children_list[1]
-        center = children_list[2]
-        bool_b0 = children_list[3]
+        length = c_data["length"]
+        center_r = c_data["parent_r"]
+        center = c_data["parent_center"]
+        bool_b0 = c_data["parent_type"]
         start_theta = length / center_r
         start_point = theta_point(start_theta, center_r, center)
         end_theta = (length + self.children_length) / center_r
