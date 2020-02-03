@@ -155,7 +155,7 @@ class A0(Node):
         if self.head.type == "Nil":
             # 一様流を書く
             self.matplotlib.draw_line((-1, 0), (1, 0))
-            self.matplotlib.draw_arrow((0, 0), math.radians(180))
+            self.matplotlib.draw_arrow((0, 0), math.pi)
         else:
             for child in self.head.child:  # 子供達の中で一番長いrを求める
                 if child[0] > long_child:
@@ -169,30 +169,29 @@ class A0(Node):
                 if child[1] == "A2":
                     self.matplotlib.draw_line((-edge, -count_r), (-child[0], -count_r))
                     self.matplotlib.draw_line((child[0], -count_r), (edge, -count_r))
-                    self.matplotlib.draw_arrow(((-edge-child[0])/2, -count_r), math.radians(180))
-                    self.matplotlib.draw_arrow(((child[0]+edge)/2, -count_r), math.radians(180))
+                    self.matplotlib.draw_arrow(((-edge-child[0])/2, -count_r), math.pi)
+                    self.matplotlib.draw_arrow(((child[0]+edge)/2, -count_r), math.pi)
                 elif child[1] == "A_minus":
                     self.matplotlib.draw_line((-edge, -count_r+child[0]), (edge, -count_r+child[0]))
-                    self.matplotlib.draw_arrow(((-edge)/2, -count_r+child[0]), math.radians(180))
-                    self.matplotlib.draw_arrow(((edge)/2, -count_r+child[0]), math.radians(180))
+                    self.matplotlib.draw_arrow((-edge/2, -count_r+child[0]), math.pi)
+                    self.matplotlib.draw_arrow((edge/2, -count_r+child[0]), math.pi)
                 else:
                     self.matplotlib.draw_line((-edge, -count_r-child[0]), (edge, -count_r-child[0]))
-                    self.matplotlib.draw_arrow(((-edge)/2, -count_r-child[0]), math.radians(180))
-                    self.matplotlib.draw_arrow(((edge)/2, -count_r-child[0]), math.radians(180))
+                    self.matplotlib.draw_arrow((-edge/2, -count_r-child[0]), math.pi)
+                    self.matplotlib.draw_arrow((edge/2, -count_r-child[0]), math.pi)
                 count_r = count_r + child[0] + self.margin
         self.head.draw(children_data)
 
-class B0_plus(Node):
+class B0(Node):
     def __init__(self, head, tail):
         super().__init__()
-        self.type = "B0_plus"
         self.head = head
         self.tail = tail
         self.margin = 0.5
         high_children = c_list_high(tail.child)
         children_length = c_list_circ_length(tail.child, self.margin)
         if children_length / (2 * math.pi) > head.r + high_children + self.margin:
-            self.r = (children_length) / (2 * math.pi)
+            self.r = children_length / (2 * math.pi)
         else:
             self.r = head.r + high_children + self.margin
 
@@ -204,19 +203,19 @@ class B0_plus(Node):
         for_children = make_list_for_c(self.tail.child, self.r, (0, 0), True, 2*self.r*math.pi, first_child=True)
         self.head.draw((0, 0))
         self.tail.draw(for_children)
-
+    
     def plot_arrow(self):
-        self.matplotlib.draw_arrow((self.r, 0), math.radians(90))
+        pass
 
-class B0_minus(B0_plus):
-    def __init__(self, head, tail):
-        super().__init__(head, tail)
-        self.type = "B0_minus"
-
+class B0_plus(B0):
     def plot_arrow(self):
-        self.matplotlib.draw_arrow((self.r, 0), math.radians(270))
+        self.matplotlib.draw_arrow((self.r, 0), math.pi/2)
 
-class A_plus(Node):
+class B0_minus(B0):
+    def plot_arrow(self):
+        self.matplotlib.draw_arrow((self.r, 0), math.pi*1.5)
+
+class A_Flip(Node):
     def __init__(self, head):
         super().__init__()
         self.type = "A_plus"
@@ -231,18 +230,26 @@ class A_plus(Node):
         self.matplotlib.draw_point((center[0], center[1]-self.r))
         self.head.draw(center)
 
-    def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0]-self.r, center[1]), theta=math.radians(270))
-        self.matplotlib.draw_arrow((center[0]+self.r, center[1]), theta=math.radians(90))
+    def plot_arrow(self, *arg):
+        pass
 
-class A_minus(A_plus):
+class A_plus(A_Flip):
+    def __init__(self, head):
+        super().__init__(head)
+        self.type = "A_plus"
+
+    def plot_arrow(self, center):
+        self.matplotlib.draw_arrow((center[0]-self.r, center[1]), theta=math.pi*1.5)
+        self.matplotlib.draw_arrow((center[0]+self.r, center[1]), theta=math.pi/2)
+
+class A_minus(A_Flip):
     def __init__(self, head):
         super().__init__(head)
         self.type = "A_minus"
 
     def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0]-self.r, center[1]), theta=math.radians(90))
-        self.matplotlib.draw_arrow((center[0]+self.r, center[1]), theta=math.radians(270))
+        self.matplotlib.draw_arrow((center[0]-self.r, center[1]), theta=math.pi/2)
+        self.matplotlib.draw_arrow((center[0]+self.r, center[1]), theta=math.pi*1.5)
 
 class A2(Node):
     def __init__(self, head, tail):
@@ -320,7 +327,7 @@ class Leaf(Node):
     def draw(self, center):
         pass
 
-class B_plus_plus(Node):
+class B_Evc(Node):
     def __init__(self, head, tail):
         super().__init__()
         # headは上の円の半径、tailは下の円の半径
@@ -339,13 +346,10 @@ class B_plus_plus(Node):
         self.head.draw((center[0], self.l_down_r+self.margin+center[1]))
         self.tail.draw((center[0], -self.l_up_r-self.margin+center[1]))
 
-    def plot_arrow(self, center):
-        # 上の円の矢印
-        self.matplotlib.draw_arrow((center[0], self.l_down_r+2*self.margin+center[1]+self.l_up_r), math.radians(180)) 
-        # 下の円の矢印
-        self.matplotlib.draw_arrow((center[0], -self.l_up_r-2*self.margin+center[1]-self.l_down_r), math.radians(0))  
+    def plot_arrow(self, *arg):
+        pass
 
-class B_plus_minus(Node):
+class B_Flip(Node):
     def __init__(self, head, tail):
         super().__init__()
         self.head = head
@@ -363,11 +367,10 @@ class B_plus_minus(Node):
         self.head.draw((center[0], self.l_down_r+self.margin+center[1]))
         self.tail.draw((center[0], -self.l_up_r-self.margin+center[1]))
 
-    def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0], self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin), theta=math.radians(180))
-        self.matplotlib.draw_arrow((center[0], center[1]-(self.l_up_r+self.l_down_r+2*self.margin)))
+    def plot_arrow(self, *arg):
+        pass
 
-class Beta_plus(Node):
+class Beta(Node):
     def __init__(self, head):
         super().__init__()
         self.head = head
@@ -385,29 +388,44 @@ class Beta_plus(Node):
         self.plot_arrow(center)
         self.head.draw(for_children)
 
-    def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0]+self.center_r, center[1]), math.radians(90))
+    def plot_arrow(self, *arg):
+        pass
 
-class B_minus_minus(B_plus_plus):
+class B_plus_plus(B_Evc):
     def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0], self.tail.r+2*self.margin+center[1]+self.head.r), math.radians(0))
-        self.matplotlib.draw_arrow((center[0],-self.head.r-2*self.margin+center[1]-self.tail.r), math.radians(180))
+        # 上の円の矢印
+        self.matplotlib.draw_arrow((center[0], self.l_down_r+2*self.margin+center[1]+self.l_up_r), math.pi) 
+        # 下の円の矢印
+        self.matplotlib.draw_arrow((center[0], -self.l_up_r-2*self.margin+center[1]-self.l_down_r), 0)  
 
-class B_minus_plus(B_plus_minus):
+class B_plus_minus(B_Flip):
     def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0], self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin), theta=math.radians(0))
-        self.matplotlib.draw_arrow((center[0], center[1]-(self.l_up_r+self.l_down_r+2*self.margin)), theta=math.radians(180))
+        self.matplotlib.draw_arrow((center[0], self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin), theta=math.pi)
+        self.matplotlib.draw_arrow((center[0], center[1]-(self.l_up_r+self.l_down_r+2*self.margin)))
 
-class Beta_minus(Beta_plus):
+class Beta_plus(Beta):
     def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0]+self.center_r, center[1]), math.radians(270))
+        self.matplotlib.draw_arrow((center[0]+self.center_r, center[1]), math.pi/2)
 
-class C_plus(Node):
+class B_minus_minus(B_Evc):
+    def plot_arrow(self, center):
+        self.matplotlib.draw_arrow((center[0], self.tail.r+2*self.margin+center[1]+self.head.r), 0)
+        self.matplotlib.draw_arrow((center[0],-self.head.r-2*self.margin+center[1]-self.tail.r), math.pi)
+
+class B_minus_plus(B_Flip):
+    def plot_arrow(self, center):
+        self.matplotlib.draw_arrow((center[0], self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin), theta=0)
+        self.matplotlib.draw_arrow((center[0], center[1]-(self.l_up_r+self.l_down_r+2*self.margin)), theta=math.pi)
+
+class Beta_minus(Beta):
+    def plot_arrow(self, center):
+        self.matplotlib.draw_arrow((center[0]+self.center_r, center[1]), math.pi*1.5)
+
+class C(Node):
     def __init__(self, head, tail):
         super().__init__()
         self.head = head
         self.tail = tail
-        self.type = "C_plus"
         self.margin = 1  # c系の要素の両脇に作るスペースの大きさ
         self.circ_margin = 0.5  # 子のb系の要素と親の間の距離
         self.high_children = c_list_high(tail.child)
@@ -459,19 +477,27 @@ class C_plus(Node):
         self.head.draw(b_center)
         self.tail.draw(for_children)
 
+    def plot_arrow(self, *arg):
+        pass
+
+class C_plus(C):
+    def __init__(self, head, tail):
+        super().__init__(head, tail)
+        self.type = "C_plus"
+
     def plot_arrow(self, bool_b0, high_point, high_theta):
         if bool_b0:
-            self.matplotlib.draw_arrow(high_point, high_theta+math.radians(270))
+            self.matplotlib.draw_arrow(high_point, high_theta+math.pi*1.5)
         else:
-            self.matplotlib.draw_arrow(high_point, high_theta+math.radians(90))
+            self.matplotlib.draw_arrow(high_point, high_theta+math.pi/2)
 
-class C_minus(C_plus):
+class C_minus(C):
     def __init__(self, head, tail):
         super().__init__(head, tail)
         self.type = "C_minus"
 
     def plot_arrow(self, bool_b0, high_point, high_theta):
         if bool_b0:
-            self.matplotlib.draw_arrow(high_point, high_theta+math.radians(90))
+            self.matplotlib.draw_arrow(high_point, high_theta+math.pi/2)
         else:
-            self.matplotlib.draw_arrow(high_point, high_theta+math.radians(270))
+            self.matplotlib.draw_arrow(high_point, high_theta+math.pi*1.5)

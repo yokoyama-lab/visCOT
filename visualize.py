@@ -1,7 +1,6 @@
-import flow
-import yacc
 import os
-from flow import Matplotlib
+from src import flow, yacc
+from src.flow import Matplotlib
 
 import math
 import numpy as np
@@ -30,7 +29,7 @@ class main:
             else:
                 pass
             matplotlib.clear_matplotlib()
-        except AttributeError:
-            print("please tpye correct syntax.")
+        #except AttributeError:
+        #    print("please tpye correct syntax.")
         except EOFError:
             break
