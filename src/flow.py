@@ -289,11 +289,9 @@ class Cons(Node):
         head_child = [s for s in head.child if s != (0, 0)]
         tail_child = [s for s in tail.child if s != (0, 0)]
         self.child = []
-        if len(head.child) != 0:
-            for child in head_child:
+        for child in head_child:
                 self.child.append(child)
-        if len(tail.child) != 0:
-            for child in tail_child:
+        for child in tail_child:
                 self.child.append(child)
 
     def draw(self, children_list):
@@ -427,10 +425,7 @@ class C(Node):
         self.circ_margin = 0.5  # 子のb系の要素と親の間の距離
         self.high_children = c_list_high(tail.child)
         self.children_length = c_list_circ_length(tail.child, self.margin)
-        if 2 * head.r > self.children_length:
-            bottom_length = head.r*2
-        else:
-            bottom_length = self.children_length
+        bottom_length = max(head.r*2, self.children_length)
         self.high = 2 * head.r + self.high_children + self.margin
         if (self.head.r == 0) and (len(self.tail.child) != 1):
             self.high = self.high + len(self.tail.child) * 1
