@@ -50,26 +50,26 @@ def make_list_for_c(children, parent_r, parent_center, parent_type, margin, pare
             length += child[1]
     return c_list
 
-class Matplotlib:
+class Canvas:
     # matplotlibの初期化設定
     def __init__(self):
         self.ax = plt.axes()
         plt.axis('off')
         self.ax.set_aspect('equal')
 
-    # matplotlibを表示
-    def show_matplotlib(self):
+    # 作成された図を表示
+    def show_canvas(self):
         plt.tight_layout()
         plt.show()
 
-    # matplotlibで作成された画像を保存
-    def save_matplotlib(self, file_name):
+    # 作成された画像を保存
+    def save_canvas(self, file_name):
         print("save picture! ")
         plt.tight_layout()
         plt.savefig(file_name)
 
     # matplotlibのデータ削除
-    def clear_matplotlib(self):
+    def clear_canvas(self):
         plt.close("all")
         plt.cla()
         plt.axis('off')
@@ -127,19 +127,22 @@ class Matplotlib:
 class Node(object, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __init__(self):
-        self.matplotlib = None
+        self.canvas = None
         self.head = None
         self.tail = None
 
-    def draw(self):
+    def draw(self, *arg):
         pass
 
-    def set_matplotlib(self, matplotlib):
-        self.matplotlib = matplotlib
+    def plot_arrow(self, *arg):
+        pass
+
+    def set_canvas(self, canvas):
+        self.canvas = canvas
         if self.head is not None:
-            self.head.set_matplotlib(matplotlib)
+            self.head.set_canvas(canvas)
         if self.tail is not None:
-            self.tail.set_matplotlib(matplotlib)
+            self.tail.set_canvas(canvas)
 
 class A0(Node):
     def __init__(self, head):    # 子の半径を定義
@@ -154,8 +157,8 @@ class A0(Node):
         count_r = 0
         if self.head.type == "Nil":
             # 一様流を書く
-            self.matplotlib.draw_line((-1, 0), (1, 0))
-            self.matplotlib.draw_arrow((0, 0), math.pi)
+            self.canvas.draw_line((-1, 0), (1, 0))
+            self.canvas.draw_arrow((0, 0), math.pi)
         else:
             for child in self.head.child:  # 子供達の中で一番長いrを求める
                 if child[0] > long_child:
@@ -167,18 +170,18 @@ class A0(Node):
                 # 子供それぞれについて中心点を作成して配列に格納
                 children_data.append((0, -count_r))
                 if child[1] == "A2":
-                    self.matplotlib.draw_line((-edge, -count_r), (-child[0], -count_r))
-                    self.matplotlib.draw_line((child[0], -count_r), (edge, -count_r))
-                    self.matplotlib.draw_arrow(((-edge-child[0])/2, -count_r), math.pi)
-                    self.matplotlib.draw_arrow(((child[0]+edge)/2, -count_r), math.pi)
+                    self.canvas.draw_line((-edge, -count_r), (-child[0], -count_r))
+                    self.canvas.draw_line((child[0], -count_r), (edge, -count_r))
+                    self.canvas.draw_arrow(((-edge-child[0])/2, -count_r), math.pi)
+                    self.canvas.draw_arrow(((child[0]+edge)/2, -count_r), math.pi)
                 elif child[1] == "A_minus":
-                    self.matplotlib.draw_line((-edge, -count_r+child[0]), (edge, -count_r+child[0]))
-                    self.matplotlib.draw_arrow((-edge/2, -count_r+child[0]), math.pi)
-                    self.matplotlib.draw_arrow((edge/2, -count_r+child[0]), math.pi)
+                    self.canvas.draw_line((-edge, -count_r+child[0]), (edge, -count_r+child[0]))
+                    self.canvas.draw_arrow((-edge/2, -count_r+child[0]), math.pi)
+                    self.canvas.draw_arrow((edge/2, -count_r+child[0]), math.pi)
                 else:
-                    self.matplotlib.draw_line((-edge, -count_r-child[0]), (edge, -count_r-child[0]))
-                    self.matplotlib.draw_arrow((-edge/2, -count_r-child[0]), math.pi)
-                    self.matplotlib.draw_arrow((edge/2, -count_r-child[0]), math.pi)
+                    self.canvas.draw_line((-edge, -count_r-child[0]), (edge, -count_r-child[0]))
+                    self.canvas.draw_arrow((-edge/2, -count_r-child[0]), math.pi)
+                    self.canvas.draw_arrow((edge/2, -count_r-child[0]), math.pi)
                 count_r += child[0] + self.margin
         self.head.draw(children_data)
 
@@ -194,23 +197,20 @@ class B0(Node):
 
     def draw(self):
         side_r = self.r + self.margin
-        self.matplotlib.axvspan(side_r)
-        self.matplotlib.draw_circle(self.r, (0, 0), circle_fill=True, fc="white")
+        self.canvas.axvspan(side_r)
+        self.canvas.draw_circle(self.r, (0, 0), circle_fill=True, fc="white")
         self.plot_arrow()
         for_children = make_list_for_c(self.tail.child, self.r, (0, 0), True, 2*self.r*math.pi, first_child=True)
         self.head.draw((0, 0))
         self.tail.draw(for_children)
-    
-    def plot_arrow(self):
-        pass
 
 class B0_plus(B0):
     def plot_arrow(self):
-        self.matplotlib.draw_arrow((self.r, 0), math.pi/2)
+        self.canvas.draw_arrow((self.r, 0), math.pi/2)
 
 class B0_minus(B0):
     def plot_arrow(self):
-        self.matplotlib.draw_arrow((self.r, 0), math.pi*1.5)
+        self.canvas.draw_arrow((self.r, 0), math.pi*1.5)
 
 class A_Flip(Node):
     def __init__(self, head):
@@ -222,13 +222,10 @@ class A_Flip(Node):
         self.child = [(self.r, self.type)]
 
     def draw(self, center):  # 描画する際に親から与える中心点
-        self.matplotlib.draw_circle(self.r, center)
+        self.canvas.draw_circle(self.r, center)
         self.plot_arrow(center)
-        self.matplotlib.draw_point((center[0], center[1]-self.r))
+        self.canvas.draw_point((center[0], center[1]-self.r))
         self.head.draw(center)
-
-    def plot_arrow(self, *arg):
-        pass
 
 class A_plus(A_Flip):
     def __init__(self, head):
@@ -236,8 +233,8 @@ class A_plus(A_Flip):
         self.type = "A_plus"
 
     def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0]-self.r, center[1]), theta=math.pi*1.5)
-        self.matplotlib.draw_arrow((center[0]+self.r, center[1]), theta=math.pi/2)
+        self.canvas.draw_arrow((center[0]-self.r, center[1]), theta=math.pi*1.5)
+        self.canvas.draw_arrow((center[0]+self.r, center[1]), theta=math.pi/2)
 
 class A_minus(A_Flip):
     def __init__(self, head):
@@ -245,8 +242,8 @@ class A_minus(A_Flip):
         self.type = "A_minus"
 
     def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0]-self.r, center[1]), theta=math.pi/2)
-        self.matplotlib.draw_arrow((center[0]+self.r, center[1]), theta=math.pi*1.5)
+        self.canvas.draw_arrow((center[0]-self.r, center[1]), theta=math.pi/2)
+        self.canvas.draw_arrow((center[0]+self.r, center[1]), theta=math.pi*1.5)
 
 class A2(Node):
     def __init__(self, head, tail):
@@ -270,11 +267,11 @@ class A2(Node):
         self.child = [(self.r, self.type)]
 
     def draw(self, center):
-        self.matplotlib.draw_circle(self.center_r, center, circle_fill=True)  # a_2の描画
-        self.matplotlib.draw_point((center[0]+self.center_r, center[1]))  # 一様流との交点の描画(右)
-        self.matplotlib.draw_point((center[0]-self.center_r, center[1]))  # 一様流との交点の描画(左)
-        self.matplotlib.draw_line((center[0]-self.r, center[1]), (center[0]-self.center_r, center[1]))
-        self.matplotlib.draw_line((center[0]+self.center_r, center[1]), (center[0]+self.r, center[1]))
+        self.canvas.draw_circle(self.center_r, center, circle_fill=True)  # a_2の描画
+        self.canvas.draw_point((center[0]+self.center_r, center[1]))  # 一様流との交点の描画(右)
+        self.canvas.draw_point((center[0]-self.center_r, center[1]))  # 一様流との交点の描画(左)
+        self.canvas.draw_line((center[0]-self.r, center[1]), (center[0]-self.center_r, center[1]))
+        self.canvas.draw_line((center[0]+self.center_r, center[1]), (center[0]+self.r, center[1]))
         for_plus_children = make_list_for_c(self.head.child, self.center_r, center, False, self.margin)
         for_minus_children = make_list_for_c(self.tail.child, self.center_r, center, False, self.margin, parent_length=self.len_of_circ/2)
         self.head.draw(for_plus_children)
@@ -334,15 +331,12 @@ class B_Evc(Node):
         self.r = (2 * self.l_up_r + 2 * self.l_down_r + 4 * self.margin) / 2  # 全体の占有領域(半径)
 
     def draw(self, center=(0, 0)):  # 描画する際に親から与える中心点
-        self.matplotlib.draw_point((center[0], self.l_down_r+center[1]-self.l_up_r))  # ２つの円の交点
-        self.matplotlib.draw_circle(self.l_up_r+self.margin, (center[0], self.l_down_r+self.margin+center[1]))  # 上の円
-        self.matplotlib.draw_circle(self.l_down_r+self.margin, (center[0], -self.l_up_r-self.margin+center[1]))  # 下の円
+        self.canvas.draw_point((center[0], self.l_down_r+center[1]-self.l_up_r))  # ２つの円の交点
+        self.canvas.draw_circle(self.l_up_r+self.margin, (center[0], self.l_down_r+self.margin+center[1]))  # 上の円
+        self.canvas.draw_circle(self.l_down_r+self.margin, (center[0], -self.l_up_r-self.margin+center[1]))  # 下の円
         self.plot_arrow(center)
         self.head.draw((center[0], self.l_down_r+self.margin+center[1]))
         self.tail.draw((center[0], -self.l_up_r-self.margin+center[1]))
-
-    def plot_arrow(self, *arg):
-        pass
 
 class B_Flip(Node):
     def __init__(self, head, tail):
@@ -355,15 +349,12 @@ class B_Flip(Node):
         self.r = (2 * self.l_up_r + 2 * self.l_down_r + 4 * self.margin) / 2
 
     def draw(self, center=(0, 0)):  # 描画する際に親から与える中心点
-        self.matplotlib.draw_circle(self.l_up_r+self.margin, (center[0], self.l_down_r+self.margin+center[1]))
-        self.matplotlib.draw_circle(self.l_up_r+self.l_down_r+2*self.margin, center)
-        self.matplotlib.draw_point((center[0], self.l_down_r+self.margin+center[1]+self.l_up_r+self.margin))
+        self.canvas.draw_circle(self.l_up_r+self.margin, (center[0], self.l_down_r+self.margin+center[1]))
+        self.canvas.draw_circle(self.l_up_r+self.l_down_r+2*self.margin, center)
+        self.canvas.draw_point((center[0], self.l_down_r+self.margin+center[1]+self.l_up_r+self.margin))
         self.plot_arrow(center)
         self.head.draw((center[0], self.l_down_r+self.margin+center[1]))
         self.tail.draw((center[0], -self.l_up_r-self.margin+center[1]))
-
-    def plot_arrow(self, *arg):
-        pass
 
 class Beta(Node):
     def __init__(self, head):
@@ -378,43 +369,40 @@ class Beta(Node):
         self.r = self.center_r + high_children  # 親に渡す全体の大きさ
 
     def draw(self, center):
-        self.matplotlib.draw_circle(self.center_r, center, circle_fill=True)
+        self.canvas.draw_circle(self.center_r, center, circle_fill=True)
         for_children = make_list_for_c(self.head.child, self.center_r, center, False, self.margin)
         self.plot_arrow(center)
         self.head.draw(for_children)
 
-    def plot_arrow(self, *arg):
-        pass
-
 class B_plus_plus(B_Evc):
     def plot_arrow(self, center):
         # 上の円の矢印
-        self.matplotlib.draw_arrow((center[0], self.l_down_r+2*self.margin+center[1]+self.l_up_r), math.pi) 
+        self.canvas.draw_arrow((center[0], self.l_down_r+2*self.margin+center[1]+self.l_up_r), math.pi) 
         # 下の円の矢印
-        self.matplotlib.draw_arrow((center[0], -self.l_up_r-2*self.margin+center[1]-self.l_down_r), 0)  
+        self.canvas.draw_arrow((center[0], -self.l_up_r-2*self.margin+center[1]-self.l_down_r), 0)  
 
 class B_plus_minus(B_Flip):
     def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0], self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin), theta=math.pi)
-        self.matplotlib.draw_arrow((center[0], center[1]-(self.l_up_r+self.l_down_r+2*self.margin)))
+        self.canvas.draw_arrow((center[0], self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin), theta=math.pi)
+        self.canvas.draw_arrow((center[0], center[1]-(self.l_up_r+self.l_down_r+2*self.margin)))
 
 class Beta_plus(Beta):
     def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0]+self.center_r, center[1]), math.pi/2)
+        self.canvas.draw_arrow((center[0]+self.center_r, center[1]), math.pi/2)
 
 class B_minus_minus(B_Evc):
     def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0], self.tail.r+2*self.margin+center[1]+self.head.r), 0)
-        self.matplotlib.draw_arrow((center[0],-self.head.r-2*self.margin+center[1]-self.tail.r), math.pi)
+        self.canvas.draw_arrow((center[0], self.tail.r+2*self.margin+center[1]+self.head.r), 0)
+        self.canvas.draw_arrow((center[0],-self.head.r-2*self.margin+center[1]-self.tail.r), math.pi)
 
 class B_minus_plus(B_Flip):
     def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0], self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin), theta=0)
-        self.matplotlib.draw_arrow((center[0], center[1]-(self.l_up_r+self.l_down_r+2*self.margin)), theta=math.pi)
+        self.canvas.draw_arrow((center[0], self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin), theta=0)
+        self.canvas.draw_arrow((center[0], center[1]-(self.l_up_r+self.l_down_r+2*self.margin)), theta=math.pi)
 
 class Beta_minus(Beta):
     def plot_arrow(self, center):
-        self.matplotlib.draw_arrow((center[0]+self.center_r, center[1]), math.pi*1.5)
+        self.canvas.draw_arrow((center[0]+self.center_r, center[1]), math.pi*1.5)
 
 class C(Node):
     def __init__(self, head, tail):
@@ -458,19 +446,16 @@ class C(Node):
             # 180度の点
             b_l_center = theta_point(math.pi-b_r_theta, self.head.r+self.circ_margin, b_center)
             if self.head.r * 2 < self.children_length / 2:
-                self.matplotlib.draw_spline([start_point, high_point, end_point])
+                self.canvas.draw_spline([start_point, high_point, end_point])
             else:
-                self.matplotlib.draw_spline([start_point, b_r_center, high_point, b_l_center, end_point])
+                self.canvas.draw_spline([start_point, b_r_center, high_point, b_l_center, end_point])
         else:
-            self.matplotlib.draw_spline([start_point, high_point, end_point])
-        self.matplotlib.draw_point(start_point)
-        self.matplotlib.draw_point(end_point)
+            self.canvas.draw_spline([start_point, high_point, end_point])
+        self.canvas.draw_point(start_point)
+        self.canvas.draw_point(end_point)
         for_children = make_list_for_c(self.tail.child, center_r, center, bool_b0, self.margin/1.5, parent_length=length)
         self.head.draw(b_center)
         self.tail.draw(for_children)
-
-    def plot_arrow(self, *arg):
-        pass
 
 class C_plus(C):
     def __init__(self, head, tail):
@@ -478,7 +463,7 @@ class C_plus(C):
         self.type = "C_plus"
 
     def plot_arrow(self, bool_b0, high_point, high_theta):
-        self.matplotlib.draw_arrow(high_point, high_theta+ math.pi*(1.5 if bool_b0 else 0.5))
+        self.canvas.draw_arrow(high_point, high_theta+ math.pi*(1.5 if bool_b0 else 0.5))
 
 class C_minus(C):
     def __init__(self, head, tail):
@@ -486,4 +471,4 @@ class C_minus(C):
         self.type = "C_minus"
 
     def plot_arrow(self, bool_b0, high_point, high_theta):
-        self.matplotlib.draw_arrow(high_point, high_theta+ math.pi*(0.5 if bool_b0 else 1.5))
+        self.canvas.draw_arrow(high_point, high_theta+ math.pi*(0.5 if bool_b0 else 1.5))
