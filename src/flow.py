@@ -215,24 +215,23 @@ class B0_minus(B0):
 class A_Flip(Node):
     def __init__(self, head):
         super().__init__()
-        self.type = "A_plus"
         self.head = head
         self.margin = 0.5  # 子の専有領域と親の領域の余白
         self.r = head.r + self.margin
-        self.child = [(self.r, self.type)]
 
     def draw(self, center):  # 描画する際に親から与える中心点
         self.canvas.draw_circle(self.r, center)
         self.plot_arrow(center)
-        self.canvas.draw_point((center[0], center[1]-self.r))
         self.head.draw(center)
 
 class A_plus(A_Flip):
     def __init__(self, head):
         super().__init__(head)
         self.type = "A_plus"
+        self.child = [(self.r, self.type)]
 
     def plot_arrow(self, center):
+        self.canvas.draw_point((center[0], center[1]-self.r))
         self.canvas.draw_arrow((center[0]-self.r, center[1]), theta=math.pi*1.5)
         self.canvas.draw_arrow((center[0]+self.r, center[1]), theta=math.pi/2)
 
@@ -240,8 +239,10 @@ class A_minus(A_Flip):
     def __init__(self, head):
         super().__init__(head)
         self.type = "A_minus"
+        self.child = [(self.r, self.type)]
 
     def plot_arrow(self, center):
+        self.canvas.draw_point((center[0], center[1]+self.r))
         self.canvas.draw_arrow((center[0]-self.r, center[1]), theta=math.pi/2)
         self.canvas.draw_arrow((center[0]+self.r, center[1]), theta=math.pi*1.5)
 
