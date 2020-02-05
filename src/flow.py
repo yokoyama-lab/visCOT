@@ -168,7 +168,7 @@ class A0(Node):
                 # 次の子供の中心点をy軸に-r*2して繰り返す
                 count_r += child[0] + self.margin
                 # 子供それぞれについて中心点を作成して配列に格納
-                children_data.append((0, -count_r))
+                children_data.append({"center":(0, -count_r)})
                 if child[1] == "A2":
                     self.canvas.draw_line((-edge, -count_r), (-child[0], -count_r))
                     self.canvas.draw_line((child[0], -count_r), (edge, -count_r))
@@ -219,7 +219,8 @@ class A_Flip(Node):
         self.margin = 0.5  # 子の専有領域と親の領域の余白
         self.r = head.r + self.margin
 
-    def draw(self, center):  # 描画する際に親から与える中心点
+    def draw(self, center_dic):  # 描画する際に親から与える中心点
+        center = center_dic["center"]
         self.canvas.draw_circle(self.r, center)
         self.plot_arrow(center)
         self.head.draw(center)
@@ -267,7 +268,8 @@ class A2(Node):
         self.r = self.center_r + self.high  # 専有領域の半径
         self.child = [(self.r, self.type)]
 
-    def draw(self, center):
+    def draw(self, center_dic):
+        center = center_dic["center"]
         self.canvas.draw_circle(self.center_r, center, circle_fill=True)  # a_2の描画
         self.canvas.draw_point((center[0]+self.center_r, center[1]))  # 一様流との交点の描画(右)
         self.canvas.draw_point((center[0]-self.center_r, center[1]))  # 一様流との交点の描画(左)
@@ -293,15 +295,9 @@ class Cons(Node):
                 self.child.append(child)
 
     def draw(self, children_list):
+        self.head.draw(children_list.pop(0))
         if len(children_list) != 0:
-            if isinstance(children_list, tuple):
-                self.head.draw(children_list)
-            else:
-                self.head.draw(children_list.pop(0))
-            if len(children_list) >= 1:
-                self.tail.draw(children_list)
-            else:
-                self.tail.draw((0, 0))
+            self.tail.draw(children_list)
 
 class Nil(Node):
     def __init__(self):
