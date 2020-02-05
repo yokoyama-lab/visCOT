@@ -11,27 +11,28 @@ class Main:
     """
     入力した木表現に対する流線を表示
     """
-    while True:
-        try:
-            s = input('>>> ')
-            object = yacc.parser.parse(s)
-            canvas = Canvas()
-            object.set_canvas(canvas)
-            object.draw()
-            print("draw successful!")
-            print("You can save picture or watch in matplotlib:"+"\n"+"If you want to save, please type \"save\"."+"\n"+"If you want to watch, please type \"watch\".")
-            type = input(':')
-            if type == "save":
-                dirname = "flow_picture/"
-                os.makedirs(dirname, exist_ok=True)
-                filename = dirname + s + '.png'
-                canvas.save_canvas(filename)
-            elif type == "watch":
-                canvas.show_canvas()
-            else:
-                pass
-            canvas.clear_canvas()
-        except AttributeError:
-            print("please type correct syntax.")
-        except EOFError:
-            break
+    def __init__(self):
+        while True:
+            try:
+                s = input('>>> ')
+                object = yacc.parser.parse(s)
+                canvas = Canvas()
+                object.set_canvas(canvas)
+                object.draw()
+                print("draw successful!")
+                print("You can save picture or watch in matplotlib:"+"\n"+"If you want to save, please type \"save\"."+"\n"+"If you want to watch, please type \"watch\".")
+                type = input(':')
+                if type == "save":
+                    dirname = "flow_picture/"
+                    os.makedirs(dirname, exist_ok=True)
+                    filename = dirname + s + '.png'
+                    canvas.save_canvas(filename)
+                elif type == "watch":
+                    canvas.show_canvas()
+                else:
+                    pass
+                canvas.clear_canvas()
+            except AttributeError:
+                print("please type correct syntax.")
+            except EOFError:
+                break

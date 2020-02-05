@@ -317,10 +317,7 @@ class A2(Node):
         self.head = head
         self.tail = tail
         self.margin = 0.5  # 子同士のスペースの定義
-        if c_list_high(head.occupation) > c_list_high(tail.occupation):
-            self.high = c_list_high(head.occupation)
-        else:
-            self.high = c_list_high(tail.occupation)  # 高さを調べる変数
+        self.high = max(c_list_high(head.occupation), c_list_high(tail.occupation))
         len_of_plus_circ = c_list_circ_length(head.occupation, self.margin) + self.margin  # plus回りの長さ
         len_of_minus_circ = c_list_circ_length(tail.occupation, self.margin) + self.margin  # minus回りの長さ
         if len_of_plus_circ >= len_of_minus_circ:
