@@ -18,7 +18,7 @@ def p_expr_b0_minus(p):
      p[0] = flow.B0_minus(p[3], p[6])
 
 def p_expr_as_nil(p):
-     'as : NIL'#文法ルール
+     'as : NIL'
      p[0] = flow.Nil()
 
 def p_expr_as_cons(p):
