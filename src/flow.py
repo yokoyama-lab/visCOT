@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import abc
 
 import math
@@ -6,20 +8,26 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from scipy import interpolate
 
-# 半径とthetaと中心点を使って二次元上の点の位置を求める関数
 def theta_point(theta, r, center):
+    """
+    半径とthetaと中心点を使って二次元上の点の位置を求める関数
+    """
     return (r * math.cos(theta) + center[0], r * math.sin(theta) + center[1])
 
-# C系の配列[(self.high,self.bottom_length),...]から最も大きい高さを求める関数
-def c_list_high(children):
-    return max(map(lambda x: x[0], children))
-
-# C系の配列[(self.high,self.bottom_length),...]から円周を求める関数
-def c_list_circ_length(children, margin):  
+def c_list_high(children_ocu_list):
+    """
+    C系の配列[(self.high,self.bottom_length),...]から最も大きい高さを求める関数
+    """
+    return max(map(lambda x: x[0], children_ocu_list))
+ 
+def c_list_circ_length(children_ocu_list, margin):  
+    """
+    C系の配列[(self.high,self.bottom_length),...]から円周を求める関数
+    """
     # marginはc同士の間に空けたいスペース
     circ_length = 0  # 円周を保存する変数
     longest_child = 0  # 最も長い子供の長さを保存する変数
-    for child in children:
+    for child in children_ocu_list:
         circ_length += child[1]+margin  # スペース分円周を伸ばす
         if longest_child < child[1]:
             longest_child = child[1]
@@ -29,61 +37,78 @@ def c_list_circ_length(children, margin):
         circ_length = longest_child*2
     return circ_length
 
-# Cをdrawするための配列[[基準点からの距離,親の半径,親の中心,親がB0かどうか],...]を作成する関数
-# parent_lengthは親の円の特定の位置から書き始めたいとき用(a2など)
-def make_list_for_c(children, parent_r, parent_center, parent_type, margin, parent_length=0, first_child=False):
+def make_list_for_c(children_ocu_list, parent_r, parent_center, parent_type, margin, parent_length=0, first_child=False):
+    """
+    Cをdrawするための配列[[基準点からの距離,親の半径,親の中心,親がB0かどうか],...]を作成する関数
+    """
+    # parent_lengthは親の円の特定の位置から書き始めたいとき用(a2など)
     c_list = []
     length = parent_length
     if parent_type and first_child:
         length += 0.3
-        for child in children:
+        for child in children_ocu_list:
             # 子供それぞれについて円周の基準点からどれだけ離れているかと、betaの半径、betaの中心、親がB0かどうか
             c_list.append({"length":length, "parent_r":parent_r, "parent_center":parent_center, "parent_type":parent_type})
-            if length+(margin/len(children))-child[1] < length:
+            if length+(margin/len(children_ocu_list))-child[1] < length:
                 length += 1.5
             else:
-                length += (margin/len(children))-child[1]+1
+                length += (margin/len(children_ocu_list))-child[1]+1
     else:
-        for child in children:
+        for child in children_ocu_list:
             length += margin
             c_list.append({"length":length, "parent_r":parent_r, "parent_center":parent_center, "parent_type":parent_type})
             length += child[1]
     return c_list
 
 class Canvas:
-    # matplotlibの初期化設定
+    """
+    図を描画する領域
+    """
     def __init__(self):
+        """
+        matplotlibの初期化設定
+        """
         self.ax = plt.axes()
         plt.axis('off')
         self.ax.set_aspect('equal')
 
-    # 作成された図を表示
     def show_canvas(self):
+        """
+        作成された図を表示
+        """
         plt.tight_layout()
         plt.show()
 
-    # 作成された画像を保存
     def save_canvas(self, file_name):
+        """
+        作成された画像を保存
+        """
         print("save picture! ")
         plt.tight_layout()
         plt.savefig(file_name)
 
-    # matplotlibのデータ削除
     def clear_canvas(self):
+        """
+        matplotlibのデータ削除
+        """
         plt.close("all")
         plt.cla()
         plt.axis('off')
         self.ax.set_aspect('equal')
 
-    # スプライン補間
     def spline(self, x, y, point, deg):
+        """
+        スプライン補間
+        """
         tck, u = interpolate.splprep([x, y], k=deg, s=0)
         u = np.linspace(0, 1, num=point, endpoint=True)
         spline = interpolate.splev(u, tck)
         return spline[0], spline[1]
 
-    # スプライン補間関数、引数はx座標y座標のタプルのリスト
     def draw_spline(self, xy):
+        """
+        スプライン補間関数、引数はx座標y座標のタプルのリスト
+        """
         count = len(xy)
         x = []
         y = []
@@ -97,8 +122,10 @@ class Canvas:
             a, b = self.spline(x, y, 100, 2)
         plt.plot(a, b, color="black")
 
-    # 円描画、引数centerはタプル
     def draw_circle(self, r, center=(0, 0), circle_fill=False, fc="grey"):
+        """
+        円描画、引数centerはタプル
+        """
         if circle_fill:
             circ = plt.Circle(center, r, ec="black", fc=fc, linewidth=1.5)
         else:
@@ -106,22 +133,31 @@ class Canvas:
         self.ax.add_patch(circ)
         self.ax.plot()
 
-    # theta=0で右向きの矢印
     def draw_arrow(self, center, theta=0):
+        """
+        矢印を描画する
+        """
+        # theta=0で右向きの矢印
         col = 'k'
         arst = 'wedge,tail_width=0.6,shrink_factor=0.5'
         plt.annotate('', xy=(center[0]+(0.1*math.cos(theta)), center[1]+(0.05*math.sin(theta))), xytext=(center[0]+(0.1*math.cos(math.pi+theta)), center[1]+(0.1*math.sin(math.pi+theta))), arrowprops=dict(arrowstyle=arst, connectionstyle='arc3', facecolor=col, edgecolor=col, shrinkA=0, shrinkB=0))
 
-    # zoomした際大きさが変化する点をプロットする関数
     def draw_point(self, center):
+        """
+        zoomした際大きさが変化する点をプロットする関数
+        """
         plt.plot([center[0]], [center[1]], 'k.')
 
-    # xy_1からxy_2まで直線を引く関数
     def draw_line(self, xy_1, xy_2):
+        """
+        xy_1からxy_2まで直線を引く関数
+        """
         plt.plot([xy_1[0], xy_2[0]], [xy_1[1], xy_2[1]], 'k-')
 
-    # 半径rの周りを塗りつぶす関数
     def axvspan(self, r):
+        """
+        半径rの周りを塗りつぶす関数
+        """
         self.ax.axvspan(-r, r, -r, r, color="gray", alpha=0.5)
 
 class Node(object, metaclass=abc.ABCMeta):
@@ -132,12 +168,21 @@ class Node(object, metaclass=abc.ABCMeta):
         self.tail = None
 
     def draw(self, *arg):
+        """
+        描画処理を行うメソッド
+        """
         pass
 
     def plot_arrow(self, *arg):
+        """
+        矢印などの描画を行う
+        """
         pass
 
     def set_canvas(self, canvas):
+        """
+        描画を行うキャンバスを指定する
+        """
         self.canvas = canvas
         if self.head is not None:
             self.head.set_canvas(canvas)
@@ -145,6 +190,9 @@ class Node(object, metaclass=abc.ABCMeta):
             self.tail.set_canvas(canvas)
 
 class A0(Node):
+    """
+    A0を扱うクラス
+    """
     def __init__(self, head):    # 子の半径を定義
         super().__init__()
         self.type = "A0"
@@ -153,33 +201,36 @@ class A0(Node):
 
     def draw(self):
         long_child = 0
-        children_data = []  # drawで引数として渡す
+        childrens_info = []  # drawで引数として渡す
         count_r = 0
         if self.head.type == "Nil":
             # 一様流を書く
             self.canvas.draw_line((-1, 0), (1, 0))
             self.canvas.draw_arrow((0, 0), math.pi)
         else:
-            for child in self.head.child:  # 子供達の中で一番長いrを求める
+            for child in self.head.occupation:  # 子供達の中で一番長いrを求める
                 if child[0] > long_child:
                     long_child = child[0]
             edge = long_child + self.margin
-            for child in self.head.child:
+            for child in self.head.occupation:
                 # 次の子供の中心点をy軸に-r*2して繰り返す
                 count_r += child[0] + self.margin
                 # 子供それぞれについて中心点を作成して配列に格納
-                children_data.append({"center":(0, -count_r), "edge":edge})
+                childrens_info.append({"center":(0, -count_r), "edge":edge})
                 count_r += child[0] + self.margin
-        self.head.draw(children_data)
+        self.head.draw(childrens_info)
 
 class B0(Node):
+    """
+    B0+,B0-の抽象クラス
+    """
     def __init__(self, head, tail):
         super().__init__()
         self.head = head
         self.tail = tail
         self.margin = 0.5
-        high_children = c_list_high(tail.child)
-        children_length = c_list_circ_length(tail.child, self.margin)
+        high_children = c_list_high(tail.occupation)
+        children_length = c_list_circ_length(tail.occupation, self.margin)
         self.r = max(children_length / (2 * math.pi), head.r + high_children + self.margin)
 
     def draw(self):
@@ -187,19 +238,28 @@ class B0(Node):
         self.canvas.axvspan(side_r)
         self.canvas.draw_circle(self.r, (0, 0), circle_fill=True, fc="white")
         self.plot_arrow()
-        for_children = make_list_for_c(self.tail.child, self.r, (0, 0), True, 2*self.r*math.pi, first_child=True)
+        for_children = make_list_for_c(self.tail.occupation, self.r, (0, 0), True, 2*self.r*math.pi, first_child=True)
         self.head.draw((0, 0))
         self.tail.draw(for_children)
 
 class B0_plus(B0):
+    """
+    B0+を扱うクラス
+    """
     def plot_arrow(self):
         self.canvas.draw_arrow((self.r, 0), math.pi/2)
 
 class B0_minus(B0):
+    """
+    B0-を扱うクラス
+    """
     def plot_arrow(self):
         self.canvas.draw_arrow((self.r, 0), math.pi*1.5)
 
 class A_Flip(Node):
+    """
+    a+,a-の抽象クラス
+    """
     def __init__(self, head):
         super().__init__()
         self.head = head
@@ -214,10 +274,13 @@ class A_Flip(Node):
         self.head.draw(center)
 
 class A_plus(A_Flip):
+    """
+    a+を扱うクラス
+    """
     def __init__(self, head):
         super().__init__(head)
         self.type = "A_plus"
-        self.child = [(self.r, self.type)]
+        self.occupation = [(self.r, self.type)]
 
     def plot_arrow(self, center, edge):
         self.canvas.draw_point((center[0], center[1]-self.r))
@@ -228,10 +291,13 @@ class A_plus(A_Flip):
         self.canvas.draw_arrow((edge/2, center[1]-self.r), math.pi)
 
 class A_minus(A_Flip):
+    """
+    a-を扱うクラス
+    """
     def __init__(self, head):
         super().__init__(head)
         self.type = "A_minus"
-        self.child = [(self.r, self.type)]
+        self.occupation = [(self.r, self.type)]
 
     def plot_arrow(self, center, edge):
         self.canvas.draw_point((center[0], center[1]+self.r))
@@ -242,25 +308,28 @@ class A_minus(A_Flip):
         self.canvas.draw_arrow((edge/2, center[1]+self.r), math.pi)
 
 class A2(Node):
+    """
+    a2を扱うクラス
+    """
     def __init__(self, head, tail):
         super().__init__()
         self.type = "A2"
         self.head = head
         self.tail = tail
         self.margin = 0.5  # 子同士のスペースの定義
-        if c_list_high(head.child) > c_list_high(tail.child):
-            self.high = c_list_high(head.child)
+        if c_list_high(head.occupation) > c_list_high(tail.occupation):
+            self.high = c_list_high(head.occupation)
         else:
-            self.high = c_list_high(tail.child)  # 高さを調べる変数
-        len_of_plus_circ = c_list_circ_length(head.child, self.margin) + self.margin  # plus回りの長さ
-        len_of_minus_circ = c_list_circ_length(tail.child, self.margin) + self.margin  # minus回りの長さ
+            self.high = c_list_high(tail.occupation)  # 高さを調べる変数
+        len_of_plus_circ = c_list_circ_length(head.occupation, self.margin) + self.margin  # plus回りの長さ
+        len_of_minus_circ = c_list_circ_length(tail.occupation, self.margin) + self.margin  # minus回りの長さ
         if len_of_plus_circ >= len_of_minus_circ:
             self.len_of_circ = len_of_plus_circ * 2
         else:
             self.len_of_circ = len_of_minus_circ * 2
         self.center_r = self.len_of_circ / (2 * math.pi)  # a_2の円の半径
         self.r = self.center_r + self.high  # 専有領域の半径
-        self.child = [(self.r, self.type)]
+        self.occupation = [(self.r, self.type)]
 
     def draw(self, info_dic):
         center = info_dic["center"]
@@ -274,24 +343,27 @@ class A2(Node):
         self.canvas.draw_line((self.r, center[1]), (edge, center[1]))
         self.canvas.draw_arrow(((-edge-self.r)/2, center[1]), math.pi)
         self.canvas.draw_arrow(((self.r+edge)/2, center[1]), math.pi)
-        for_plus_children = make_list_for_c(self.head.child, self.center_r, center, False, self.margin)
-        for_minus_children = make_list_for_c(self.tail.child, self.center_r, center, False, self.margin, parent_length=self.len_of_circ/2)
+        for_plus_children = make_list_for_c(self.head.occupation, self.center_r, center, False, self.margin)
+        for_minus_children = make_list_for_c(self.tail.occupation, self.center_r, center, False, self.margin, parent_length=self.len_of_circ/2)
         self.head.draw(for_plus_children)
         self.tail.draw(for_minus_children)
 
 class Cons(Node):
+    """
+    consを扱うクラス
+    """
     def __init__(self, head, tail):
         super().__init__()
         self.head = head
         self.tail = tail
         self.type = head.type
-        head_child = [s for s in head.child if s != (0, 0)]
-        tail_child = [s for s in tail.child if s != (0, 0)]
-        self.child = []
+        head_child = [s for s in head.occupation if s != (0, 0)]
+        tail_child = [s for s in tail.occupation if s != (0, 0)]
+        self.occupation = []
         for child in head_child:
-                self.child.append(child)
+                self.occupation.append(child)
         for child in tail_child:
-                self.child.append(child)
+                self.occupation.append(child)
 
     def draw(self, children_list):
         self.head.draw(children_list.pop(0))
@@ -299,23 +371,26 @@ class Cons(Node):
             self.tail.draw(children_list)
 
 class Nil(Node):
+    """
+    nilを扱うクラス
+    """
     def __init__(self):
         super().__init__()
         self.type = "Nil"
-        self.child = [(0, 0)]
-
-    def draw(self, center):
-        pass
+        self.occupation = [(0, 0)]
 
 class Leaf(Node):
+    """
+    leafを扱うクラス
+    """
     def __init__(self):
         super().__init__()
         self.r = 0
 
-    def draw(self, center):
-        pass
-
 class B_Evc(Node):
+    """
+    b++,b--の抽象クラス
+    """
     def __init__(self, head, tail):
         super().__init__()
         # headは上の円の半径、tailは下の円の半径
@@ -335,6 +410,9 @@ class B_Evc(Node):
         self.tail.draw((center[0], -self.l_up_r-self.margin+center[1]))
 
 class B_Flip(Node):
+    """
+    b+-,b--の抽象クラス
+    """
     def __init__(self, head, tail):
         super().__init__()
         self.head = head
@@ -353,12 +431,15 @@ class B_Flip(Node):
         self.tail.draw((center[0], -self.l_up_r-self.margin+center[1]))
 
 class Beta(Node):
+    """
+    beta+,beta-の抽象クラス
+    """
     def __init__(self, head):
         super().__init__()
         self.head = head
         self.margin = 0.5  # 要素の両脇に作るスペースの大きさ
-        high_children = c_list_high(head.child)
-        children_length = c_list_circ_length(head.child, self.margin)
+        high_children = c_list_high(head.occupation)
+        children_length = c_list_circ_length(head.occupation, self.margin)
         self.center_r = children_length / (2 * math.pi)  # betaの円
         if children_length < 1:
             self.center_r = 7 / (2 * math.pi)
@@ -366,11 +447,14 @@ class Beta(Node):
 
     def draw(self, center):
         self.canvas.draw_circle(self.center_r, center, circle_fill=True)
-        for_children = make_list_for_c(self.head.child, self.center_r, center, False, self.margin)
+        for_children = make_list_for_c(self.head.occupation, self.center_r, center, False, self.margin)
         self.plot_arrow(center)
         self.head.draw(for_children)
 
 class B_plus_plus(B_Evc):
+    """
+    b++を扱うクラス
+    """
     def plot_arrow(self, center):
         # 上の円の矢印
         self.canvas.draw_arrow((center[0], self.l_down_r+2*self.margin+center[1]+self.l_up_r), math.pi) 
@@ -378,42 +462,60 @@ class B_plus_plus(B_Evc):
         self.canvas.draw_arrow((center[0], -self.l_up_r-2*self.margin+center[1]-self.l_down_r), 0)  
 
 class B_plus_minus(B_Flip):
+    """
+    b+-を扱うクラス
+    """
     def plot_arrow(self, center):
         self.canvas.draw_arrow((center[0], self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin), theta=math.pi)
         self.canvas.draw_arrow((center[0], center[1]-(self.l_up_r+self.l_down_r+2*self.margin)))
 
 class Beta_plus(Beta):
+    """
+    beta+を扱うクラス
+    """
     def plot_arrow(self, center):
         self.canvas.draw_arrow((center[0]+self.center_r, center[1]), math.pi/2)
 
 class B_minus_minus(B_Evc):
+    """
+    b--を扱うクラス
+    """
     def plot_arrow(self, center):
         self.canvas.draw_arrow((center[0], self.tail.r+2*self.margin+center[1]+self.head.r), 0)
         self.canvas.draw_arrow((center[0],-self.head.r-2*self.margin+center[1]-self.tail.r), math.pi)
 
 class B_minus_plus(B_Flip):
+    """
+    b-+を扱うクラス
+    """
     def plot_arrow(self, center):
         self.canvas.draw_arrow((center[0], self.l_down_r+self.margin+center[1]-self.l_up_r-self.margin), theta=0)
         self.canvas.draw_arrow((center[0], center[1]-(self.l_up_r+self.l_down_r+2*self.margin)), theta=math.pi)
 
 class Beta_minus(Beta):
+    """
+    beta-を扱うクラス
+    """
     def plot_arrow(self, center):
         self.canvas.draw_arrow((center[0]+self.center_r, center[1]), math.pi*1.5)
 
 class C(Node):
+    """
+    c+,c-の抽象クラス
+    """
     def __init__(self, head, tail):
         super().__init__()
         self.head = head
         self.tail = tail
         self.margin = 1  # c系の要素の両脇に作るスペースの大きさ
         self.circ_margin = 0.5  # 子のb系の要素と親の間の距離
-        self.high_children = c_list_high(tail.child)
-        self.children_length = c_list_circ_length(tail.child, self.margin)
+        self.high_children = c_list_high(tail.occupation)
+        self.children_length = c_list_circ_length(tail.occupation, self.margin)
         bottom_length = max(head.r*2, self.children_length)
         self.high = 2 * head.r + self.high_children + self.margin
-        if (self.head.r == 0) and (len(self.tail.child) != 1):
-            self.high += len(self.tail.child) * 1
-        self.child = [(self.high, bottom_length)]
+        if (self.head.r == 0) and (len(self.tail.occupation) != 1):
+            self.high += len(self.tail.occupation) * 1
+        self.occupation = [(self.high, bottom_length)]
 
     def draw(self, c_data):
         if self.high_children == 0:
@@ -449,11 +551,14 @@ class C(Node):
             self.canvas.draw_spline([start_point, high_point, end_point])
         self.canvas.draw_point(start_point)
         self.canvas.draw_point(end_point)
-        for_children = make_list_for_c(self.tail.child, center_r, center, bool_b0, self.margin/1.5, parent_length=length)
+        for_children = make_list_for_c(self.tail.occupation, center_r, center, bool_b0, self.margin/1.5, parent_length=length)
         self.head.draw(b_center)
         self.tail.draw(for_children)
 
 class C_plus(C):
+    """
+    c+を扱うクラス
+    """
     def __init__(self, head, tail):
         super().__init__(head, tail)
         self.type = "C_plus"
@@ -462,6 +567,9 @@ class C_plus(C):
         self.canvas.draw_arrow(high_point, high_theta+ math.pi*(1.5 if bool_b0 else 0.5))
 
 class C_minus(C):
+    """
+    c-を扱うクラス
+    """
     def __init__(self, head, tail):
         super().__init__(head, tail)
         self.type = "C_minus"

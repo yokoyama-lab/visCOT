@@ -1,8 +1,16 @@
+"""
+Visualization program of tree representation of structurally stable incompressible flow in two dimensional multiply-connected domain
+"""
+# -*- coding: utf-8 -*-
+
 import os
 from src import flow, yacc
 from src.flow import Canvas
 
-class main:
+class Main:
+    """
+    入力した木表現に対する流線を表示
+    """
     while True:
         try:
             s = input('>>> ')
