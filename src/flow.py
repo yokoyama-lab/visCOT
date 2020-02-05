@@ -168,20 +168,7 @@ class A0(Node):
                 # 次の子供の中心点をy軸に-r*2して繰り返す
                 count_r += child[0] + self.margin
                 # 子供それぞれについて中心点を作成して配列に格納
-                children_data.append({"center":(0, -count_r)})
-                if child[1] == "A2":
-                    self.canvas.draw_line((-edge, -count_r), (-child[0], -count_r))
-                    self.canvas.draw_line((child[0], -count_r), (edge, -count_r))
-                    self.canvas.draw_arrow(((-edge-child[0])/2, -count_r), math.pi)
-                    self.canvas.draw_arrow(((child[0]+edge)/2, -count_r), math.pi)
-                elif child[1] == "A_minus":
-                    self.canvas.draw_line((-edge, -count_r+child[0]), (edge, -count_r+child[0]))
-                    self.canvas.draw_arrow((-edge/2, -count_r+child[0]), math.pi)
-                    self.canvas.draw_arrow((edge/2, -count_r+child[0]), math.pi)
-                else:
-                    self.canvas.draw_line((-edge, -count_r-child[0]), (edge, -count_r-child[0]))
-                    self.canvas.draw_arrow((-edge/2, -count_r-child[0]), math.pi)
-                    self.canvas.draw_arrow((edge/2, -count_r-child[0]), math.pi)
+                children_data.append({"center":(0, -count_r), "edge":edge})
                 count_r += child[0] + self.margin
         self.head.draw(children_data)
 
@@ -219,10 +206,11 @@ class A_Flip(Node):
         self.margin = 0.5  # 子の専有領域と親の領域の余白
         self.r = head.r + self.margin
 
-    def draw(self, center_dic):  # 描画する際に親から与える中心点
-        center = center_dic["center"]
+    def draw(self, info_dic):  # 描画する際に親から与える中心点
+        center = info_dic["center"]
+        edge = info_dic["edge"]
         self.canvas.draw_circle(self.r, center)
-        self.plot_arrow(center)
+        self.plot_arrow(center,edge)
         self.head.draw(center)
 
 class A_plus(A_Flip):
@@ -231,10 +219,13 @@ class A_plus(A_Flip):
         self.type = "A_plus"
         self.child = [(self.r, self.type)]
 
-    def plot_arrow(self, center):
+    def plot_arrow(self, center, edge):
         self.canvas.draw_point((center[0], center[1]-self.r))
         self.canvas.draw_arrow((center[0]-self.r, center[1]), theta=math.pi*1.5)
         self.canvas.draw_arrow((center[0]+self.r, center[1]), theta=math.pi/2)
+        self.canvas.draw_line((-edge, center[1]-self.r), (edge, center[1]-self.r))
+        self.canvas.draw_arrow((-edge/2, center[1]-self.r), math.pi)
+        self.canvas.draw_arrow((edge/2, center[1]-self.r), math.pi)
 
 class A_minus(A_Flip):
     def __init__(self, head):
@@ -242,10 +233,13 @@ class A_minus(A_Flip):
         self.type = "A_minus"
         self.child = [(self.r, self.type)]
 
-    def plot_arrow(self, center):
+    def plot_arrow(self, center, edge):
         self.canvas.draw_point((center[0], center[1]+self.r))
         self.canvas.draw_arrow((center[0]-self.r, center[1]), theta=math.pi/2)
         self.canvas.draw_arrow((center[0]+self.r, center[1]), theta=math.pi*1.5)
+        self.canvas.draw_line((-edge, center[1]+self.r), (edge, center[1]+self.r))
+        self.canvas.draw_arrow((-edge/2, center[1]+self.r), math.pi)
+        self.canvas.draw_arrow((edge/2, center[1]+self.r), math.pi)
 
 class A2(Node):
     def __init__(self, head, tail):
@@ -268,13 +262,18 @@ class A2(Node):
         self.r = self.center_r + self.high  # 専有領域の半径
         self.child = [(self.r, self.type)]
 
-    def draw(self, center_dic):
-        center = center_dic["center"]
+    def draw(self, info_dic):
+        center = info_dic["center"]
+        edge = info_dic["edge"]
         self.canvas.draw_circle(self.center_r, center, circle_fill=True)  # a_2の描画
         self.canvas.draw_point((center[0]+self.center_r, center[1]))  # 一様流との交点の描画(右)
         self.canvas.draw_point((center[0]-self.center_r, center[1]))  # 一様流との交点の描画(左)
         self.canvas.draw_line((center[0]-self.r, center[1]), (center[0]-self.center_r, center[1]))
         self.canvas.draw_line((center[0]+self.center_r, center[1]), (center[0]+self.r, center[1]))
+        self.canvas.draw_line((-edge, center[1]), (-self.r, center[1]))
+        self.canvas.draw_line((self.r, center[1]), (edge, center[1]))
+        self.canvas.draw_arrow(((-edge-self.r)/2, center[1]), math.pi)
+        self.canvas.draw_arrow(((self.r+edge)/2, center[1]), math.pi)
         for_plus_children = make_list_for_c(self.head.child, self.center_r, center, False, self.margin)
         for_minus_children = make_list_for_c(self.tail.child, self.center_r, center, False, self.margin, parent_length=self.len_of_circ/2)
         self.head.draw(for_plus_children)
