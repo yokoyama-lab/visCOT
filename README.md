@@ -1,4 +1,4 @@
-# Visualization program of tree representation of structurally stable incompressible flow in two dimensional multiple connection domain
+# Visualization program of tree representation of structurally stable incompressible flow in two dimensional multiply-connected domain
 
 このプログラムは2次元多重連結領域内における構造安定な非圧縮流れの木表現の入力に対して，同一のトポロジーを表す2次元上の図を作図するものです．
 想定されている入力は，Consで繋がれた木を同一の高さとして見た場合の，深さが3までの木です．
@@ -35,8 +35,7 @@ pip3 install PLY
 ## 実行例
 プログラムを起動し，木表現を入力する．
 ```
-cd Visualization-program-of-flow
-python3 main.py
+python3 visualize.py
 ```
 
 木表現は，例えば次のように入力する．

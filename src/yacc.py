@@ -1,9 +1,9 @@
 # Yacc. PLYを用いる
 
 import ply.yacc as yacc
-from lex import tokens
+from .lex import tokens
 import sys
-import flow
+from . import flow
 
 def p_expr_a0(p):
      's : A0 LPAREN as RPAREN'
@@ -18,7 +18,7 @@ def p_expr_b0_minus(p):
      p[0] = flow.B0_minus(p[3], p[6])
 
 def p_expr_as_nil(p):
-     'as : NIL'#文法ルール
+     'as : NIL'
      p[0] = flow.Nil()
 
 def p_expr_as_cons(p):
