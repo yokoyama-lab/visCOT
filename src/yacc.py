@@ -61,7 +61,7 @@ def p_cs_plus(p):
      if p[1] == 'n': p[0] = flow.Nil()
      elif p[1] == 'cons': p[0] = flow.Cons(p[3], p[5])
 
-def p_cs_minus_nil(p):
+def p_cs_minus(p):
      '''cs_minus : NIL
                  | CONS '(' c_minus ',' cs_minus ')' '''
      if p[1] == 'n': p[0] = flow.Nil()
