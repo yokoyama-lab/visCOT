@@ -49,7 +49,7 @@ ________________________________________________________________________________
 
 #a0(cons(a-(l),cons(a+(l),n)))
 #a0(cons(a-(l),cons(a-(l),n)))
-#a0(cons(a-(l),cons(a2(n,n),n)))               
+#a0(cons(a-(l),cons(a2(n,n),n)))
 
 #a0(cons(a2(n,n),cons(a+(l),n)))
 #a0(cons(a2(n,n),cons(a-(l),n)))
@@ -74,7 +74,7 @@ ________________________________________________________________________________
 #a0(cons(a-(l),cons(a2(n,n),cons(a+(l),n))))
 #a0(cons(a-(l),cons(a2(n,n),cons(a-(l),n))))
 #a0(cons(a-(l),cons(a2(n,n),cons(a2(n,n),n))))
-                                                     
+
 #a0(cons(a2(n,n),cons(a+(l),cons(a+(l),n))))
 #a0(cons(a2(n,n),cons(a+(l),cons(a-(l),n))))
 #a0(cons(a2(n,n),cons(a+(l),cons(a2(n,n),n))))
@@ -391,7 +391,7 @@ R #a0(cons(a-(be-(cons(c-(l,n),n))),cons(a2(n,n),n)))
 
 [b系]
 :深さ１
-#b0+(l,(n))      
+#b0+(l,(n))
 #b0-(l,(n))
 
 :深さ２
@@ -413,8 +413,8 @@ R #a0(cons(a-(be-(cons(c-(l,n),n))),cons(a2(n,n),n)))
 #b0-(b-+(l,l),(n))
 #b0-(be-(n),(n))
 2
-#b0-(l,(cons(c+(l,n),n))) 
-1,2  
+#b0-(l,(cons(c+(l,n),n)))
+1,2
 #b0-(b--(l,l),(cons(c+(l,n),n)))
 #b0-(b-+(l,l),(cons(c+(l,n),n)))
 #b0-(be-(n),(cons(c+(l,n),n)))
