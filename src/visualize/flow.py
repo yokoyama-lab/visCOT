@@ -80,7 +80,7 @@ class Canvas:
         """
         作成された画像を保存
         """
-        print("save picture! ")
+        # print("save picture! ")
         plt.tight_layout()
         plt.savefig(file_name)
 
