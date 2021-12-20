@@ -346,11 +346,23 @@ class Nil(Node):
 
 class Leaf(Node):
     """
-    leafを扱うクラス
+    l+,l-の抽象クラス
     """
     def __init__(self):
         super().__init__()
         self.r = 0
+
+class Leaf_plus(Leaf):
+    """
+    l+を扱うクラス
+    """
+    dir = 1
+
+class Leaf_minus(Leaf):
+    """
+    l-を扱うクラス
+    """
+    dir = -1
 
 class B_Evc(Node):
     """
