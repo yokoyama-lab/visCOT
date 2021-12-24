@@ -36,7 +36,7 @@ pip3 install PLY
 ## 実行例
 プログラムを起動し，木表現を入力する．
 ```
-echo "a0(cons(a2(cons(c+(l,n),cons(c+(l,n),n)),cons(c-(l,n),cons(c-(l,n),n))),n))" | python3 visualize.py
+echo "a0(a2(c+(l+,).c+(l+,),c-(l-,).c-(l-,)))" | python3 visualize.py
 ```
 
 入力用の木表現が「test.txt」に用意されているので試してみてください．
