@@ -21,15 +21,11 @@ git clone https://github.com/yokoyama-lab/Visualization-program-of-flow.git
 sudo apt install python3
 ```
 
-+ Matplotlib をインストール
++ Matplotlib, numpy, scipy, PLY をインストール
 ```
 pip3 install Matplotlib
 pip3 install numpy
 pip3 install scipy
-```
-
-+ PLY をインストール
-```
 pip3 install PLY
 ```
 
@@ -38,5 +34,3 @@ pip3 install PLY
 ```
 echo "a0(a2(c+(l+,).c+(l+,),c-(l-,).c-(l-,)))" | python3 visualize.py
 ```
-
-入力用の木表現が「test.txt」に用意されているので試してみてください．
