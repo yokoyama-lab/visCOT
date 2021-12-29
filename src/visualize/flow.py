@@ -80,7 +80,6 @@ class Canvas:
         """
         作成された画像を保存
         """
-        # print("save picture! ")
         plt.tight_layout()
         plt.savefig(file_name)
 
@@ -113,7 +112,7 @@ class Canvas:
                            min(len(xy),4)-1)
         plt.plot(a, b, color="black")
 
-    def draw_circle(self, r, center=(0, 0), circle_fill=False, fc="grey"):
+    def draw_circle(self, r, center=(0, 0), circle_fill=False, fc="gray"):
         """
         円描画、引数centerはタプル
         """
@@ -152,9 +151,9 @@ class Canvas:
 
     def axvspan(self, r):
         """
-        半径rの周りを塗りつぶす関数
+        半径rの周りを塗りつぶす関数，マージン0.1倍
         """
-        self.ax.axvspan(-r, r, -r, r, color="gray", alpha=0.5)
+        self.ax.axvspan(-r*1.1, r*1.1, color="gray", alpha=0.5)
 
 class Node(object, metaclass=abc.ABCMeta):
     dir
@@ -190,6 +189,9 @@ class Node(object, metaclass=abc.ABCMeta):
     def dir2rad(self):
         return (self.dir + 1.0) * math.pi / 2.0
 
+    def show(self):
+        pass
+
 class A0(Node):
     """
     A0を扱うクラス
@@ -215,6 +217,9 @@ class A0(Node):
                 childrens_info.append({'center':(0, -count_r), 'edge':long_child + A0.margin})
                 count_r += child['height'] + A0.margin
         self.head.draw(childrens_info)
+        
+    def show(self):
+        return "a0()" if isinstance(self.head, Nil) else "a0("+self.head.show()+")"
 
 class B0(Node):
     """
@@ -229,7 +234,7 @@ class B0(Node):
         self.r = max(children_length / (2 * math.pi), head.r + high_children + B0.margin)
 
     def draw(self):
-        self.canvas.axvspan(B0.margin)
+        self.canvas.axvspan(self.r)
         self.canvas.draw_circle(self.r, (0, 0), circle_fill=True, fc="white")
         self.plot_arrow()
         for_children = make_list_for_c(self.tail.occupation, self.r, (0, 0), True, 2*self.r*math.pi, first_child=True)
@@ -245,11 +250,17 @@ class B0_plus(B0):
     """
     dir = 1                     # + 反時計回り
 
+    def show(self):
+        return "B0+("+self.head.show()+","+self.tail.show()+")"
+
 class B0_minus(B0):
     """
     B0-を扱うクラス
     """
     dir = -1                    # - 時計回り
+
+    def show(self):
+        return "B0-("+self.head.show()+","+self.tail.show()+")"
 
 class A_Flip(Node):
     """
@@ -283,11 +294,17 @@ class A_plus(A_Flip):
     """
     dir = 1                     # + 反時計回り
 
+    def show(self):
+        return "a+("+self.head.show()+")"
+
 class A_minus(A_Flip):
     """
     a-を扱うクラス
     """
     dir = -1                    # - 時計回り
+
+    def show(self):
+        return "a-("+self.head.show()+")"
 
 class A2(Node):
     """
@@ -322,6 +339,9 @@ class A2(Node):
         self.head.draw(for_plus_children)
         self.tail.draw(for_minus_children)
 
+    def show(self):
+        return "a2("+self.head.show()+","+self.tail.show()+")"
+
 class Cons(Node):
     """
     consを扱うクラス
@@ -335,6 +355,9 @@ class Cons(Node):
         if len(children_list) > 0:
             self.tail.draw(children_list)
 
+    def show(self):
+        return self.head.show() + ("" if isinstance(self.tail, Nil) else "."+self.tail.show())
+
 class Nil(Node):
     """
     nilを扱うクラス
@@ -343,14 +366,34 @@ class Nil(Node):
         super().__init__()
         self.occupation = [{'height': 0, 'width': 0}] # 0: dummy
 
+    def show(self):
+        return ""
 
 class Leaf(Node):
     """
-    leafを扱うクラス
+    l+,l-の抽象クラス
     """
     def __init__(self):
         super().__init__()
         self.r = 0
+
+class Leaf_plus(Leaf):
+    """
+    l+を扱うクラス
+    """
+    dir = 1
+
+    def show(self):
+        return "l+"
+
+class Leaf_minus(Leaf):
+    """
+    l-を扱うクラス
+    """
+    dir = -1
+
+    def show(self):
+        return "l-"
 
 class B_Evc(Node):
     """
@@ -381,11 +424,17 @@ class B_plus_plus(B_Evc):
     """
     dir = 1                     # + 反時計回り
 
+    def show(self):
+        return "b++("+self.head.show()+","+self.tail.show()+")"
+
 class B_minus_minus(B_Evc):
     """
     b--を扱うクラス
     """
     dir = -1                    # - 時計回り
+
+    def show(self):
+        return "b--("+self.head.show()+","+self.tail.show()+")"
 
 class B_Flip(Node):
     """
@@ -419,6 +468,9 @@ class B_plus_minus(B_Flip):
     """
     dir = 1                     # + 反時計回り
 
+    def show(self):
+        return "b+-("+self.head.show()+","+self.tail.show()+")"
+
 class B_minus_plus(B_Flip):
     """
     b-+を扱うクラス
@@ -427,6 +479,9 @@ class B_minus_plus(B_Flip):
     def plot_arrow(self, center):
         self.canvas.draw_arrow((center[0], self.r_lw+B_Flip.margin+center[1]-self.r_up-B_Flip.margin), theta=0)
         self.canvas.draw_arrow((center[0], center[1]-(self.r_up+self.r_lw+2*B_Flip.margin)), theta=math.pi)
+
+    def show(self):
+        return "b-+("+self.head.show()+","+self.tail.show()+")"
 
 class Beta(Node):
     """
@@ -458,11 +513,17 @@ class Beta_plus(Beta):
     """
     dir = 1                     # + 反時計回り
 
+    def show(self):
+        return "B+("+self.head.show()+")"
+
 class Beta_minus(Beta):
     """
     beta-を扱うクラス
     """
     dir = -1                     # + 反時計回り
+
+    def show(self):
+        return "B-("+self.head.show()+")"
 
 class C(Node):
     """
@@ -528,8 +589,14 @@ class C_plus(C):
     """
     dir = 1                     # + 反時計回り
 
+    def show(self):
+        return "c+("+self.head.show()+","+self.tail.show()+")"
+
 class C_minus(C):
     """
     c-を扱うクラス
     """
     dir = -1                    # - 時計回り
+
+    def show(self):
+        return "c-("+self.head.show()+","+self.tail.show()+")"

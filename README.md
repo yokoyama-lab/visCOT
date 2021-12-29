@@ -21,22 +21,16 @@ git clone https://github.com/yokoyama-lab/Visualization-program-of-flow.git
 sudo apt install python3
 ```
 
-+ Matplotlib をインストール
++ Matplotlib, numpy, scipy, PLY をインストール
 ```
 pip3 install Matplotlib
 pip3 install numpy
 pip3 install scipy
-```
-
-+ PLY をインストール
-```
 pip3 install PLY
 ```
 
 ## 実行例
 プログラムを起動し，木表現を入力する．
 ```
-echo "a0(cons(a2(cons(c+(l,n),cons(c+(l,n),n)),cons(c-(l,n),cons(c-(l,n),n))),n))" | python3 visualize.py
+echo "a0(a2(c+(l+,).c+(l+,),c-(l-,).c-(l-,)))" | python3 visualize.py
 ```
-
-入力用の木表現が「test.txt」に用意されているので試してみてください．
