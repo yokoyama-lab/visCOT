@@ -8,7 +8,9 @@ tokens = (
     'B_PLUS_PLUS', 'B_PLUS_MINUS', 'B_MINUS_PLUS', 'B_MINUS_MINUS',
     'BETA_PLUS', 'BETA_MINUS',
     'C_PLUS', 'C_MINUS',
-    'CONS', 'NIL', 'LEAF_PLUS', 'LEAF_MINUS',
+#    'CONS', 'NIL', 
+    'S_PLUS', 'S_MINUS',
+    'LEAF_PLUS', 'LEAF_MINUS',
 )
 
 literals = "(),{}."
@@ -32,10 +34,13 @@ t_BETA_MINUS = r'B\-'
 t_C_PLUS = r'c\+'
 t_C_MINUS = r'c\-'
 
-t_CONS = r'cons'
-t_NIL = r'n'
-t_LEAF_PLUS = r'l\+'
-t_LEAF_MINUS = r'l\-'
+t_S_PLUS = r's\+'
+t_S_MINUS = r's\-'
+
+#t_CONS = r'cons'
+#t_NIL = r'n'
+t_LEAF_PLUS = r'L\+'
+t_LEAF_MINUS = r'L\-'
 
 t_ignore = ' \t\n'              # 入力を無視する
 t_ignore_COMMENT = r'\#.*'      # コメントを無視する

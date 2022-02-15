@@ -189,6 +189,24 @@ class Node(object, metaclass=abc.ABCMeta):
     def dir2rad(self):
         return (self.dir + 1.0) * math.pi / 2.0
 
+    def dir2updown(self):
+        if self.dir==1:
+            return math.pi / 2.0
+        elif self.dir==-1:
+            return - math.pi / 2.0
+
+    def dir2leftright(self):
+        if self.dir==1:
+            return 0
+        elif self.dir==-1:
+            return math.pi
+
+    def dir2rightleft(self):
+        if self.dir==1:
+            return math.pi
+        elif self.dir==-1:
+            return 0
+
     def show(self):
         pass
 
@@ -198,8 +216,11 @@ class A0(Node):
     """
     margin = 0.5
 
-    def __init__(self, head):    # 子の半径を定義
-        super().__init__(head)
+    def __init__(self, *args):    # 子の半径を定義
+        if len(args) == 0:
+            super().__init__(Nil())
+        elif len(args) == 1:
+            super().__init__(args[0])
 
     def draw(self):
         childrens_info = []  # drawで引数として渡す
@@ -242,13 +263,19 @@ class B0(Node):
         self.tail.draw(for_children)
 
     def plot_arrow(self):
-        self.canvas.draw_arrow((self.r, 0), math.pi*0.5+self.dir2rad())
+        self.canvas.draw_arrow((self.r, 0), self.dir2updown())
 
 class B0_plus(B0):
     """
     B0+を扱うクラス
     """
     dir = 1                     # + 反時計回り
+
+    def __init__(self, *args):
+        if len(args) == 0:
+            super().__init__(S_plus(), S_plus())
+        elif len(args) == 2:
+            super().__init__(head, tail)
 
     def show(self):
         return "B0+("+self.head.show()+","+self.tail.show()+")"
@@ -258,6 +285,12 @@ class B0_minus(B0):
     B0-を扱うクラス
     """
     dir = -1                    # - 時計回り
+
+    def __init__(self, *args):
+        if len(args) == 0:
+            super().__init__(S_minus(), S_minus())
+        elif len(args) == 2:
+            super().__init__(head, tail)
 
     def show(self):
         return "B0-("+self.head.show()+","+self.tail.show()+")"
@@ -282,17 +315,21 @@ class A_Flip(Node):
 
     def plot_arrow(self, center, edge):
         self.canvas.draw_point((center[0], center[1]-self.r*self.dir))
-        self.canvas.draw_arrow((center[0]-self.r, center[1]), theta=math.pi*1.5+self.dir2rad())
-        self.canvas.draw_arrow((center[0]+self.r, center[1]), theta=math.pi*0.5+self.dir2rad())
+        self.canvas.draw_arrow((center[0]-self.r, center[1]), theta=self.dir2updown())
+        self.canvas.draw_arrow((center[0]+self.r, center[1]), theta=-self.dir2updown())
         self.canvas.draw_line((-edge, center[1]-self.r*self.dir), (edge, center[1]-self.r*self.dir))
-        self.canvas.draw_arrow((-edge/2, center[1]-self.r*self.dir), math.pi+self.dir2rad())
-        self.canvas.draw_arrow(( edge/2, center[1]-self.r*self.dir), math.pi+self.dir2rad())
+        self.canvas.draw_arrow((-edge/2, center[1]-self.r*self.dir), self.dir2leftright())
+        self.canvas.draw_arrow(( edge/2, center[1]-self.r*self.dir), self.dir2leftright())
 
 class A_plus(A_Flip):
     """
     a+を扱うクラス
     """
     dir = 1                     # + 反時計回り
+
+    def __init__(self, *args):
+        if len(args) == 0: super().__init__(S_plus())
+        elif len(args) == 1: super().__init__(args[0])
 
     def show(self):
         return "a+("+self.head.show()+")"
@@ -303,6 +340,10 @@ class A_minus(A_Flip):
     """
     dir = -1                    # - 時計回り
 
+    def __init__(self, *args):
+        if len(args) == 0: super().__init__(S_minus())
+        elif len(args) == 1: super().__init__(args[0])
+
     def show(self):
         return "a-("+self.head.show()+")"
 
@@ -312,11 +353,15 @@ class A2(Node):
     """
     margin = 0.5  # 子同士のスペースの定義
 
-    def __init__(self, head, tail):
+    def __init__(self, *args):
+        if len(args) == 0:
+            head, tail = Nil(), Nil()
+        elif len(args) == 2:
+            head, tail = args
         super().__init__(head, tail)
         self.high = max(c_list_highest(head.occupation), c_list_highest(tail.occupation))
-        len_of_plus_circ  = c_list_circ_length(head.occupation, A2.margin) + A2.margin  # plus回りの長さ
-        len_of_minus_circ = c_list_circ_length(tail.occupation, A2.margin) + A2.margin  # minus回りの長さ
+        len_of_plus_circ  = c_list_circ_length(head.occupation, A2.margin) + (A2.margin if len(head.occupation)!=1 else 0)  # plus回りの長さ
+        len_of_minus_circ = c_list_circ_length(tail.occupation, A2.margin) + (A2.margin if len(head.occupation)!=1 else 0)  # minus回りの長さ
         self.len_of_circ = max(len_of_plus_circ, len_of_minus_circ) * 2
         self.center_r = self.len_of_circ / (2 * math.pi)  # a_2の円の半径
         self.r = self.center_r + self.high  # 専有領域の半径
@@ -371,29 +416,61 @@ class Nil(Node):
 
 class Leaf(Node):
     """
-    l+,l-の抽象クラス
+    L+,L-の抽象クラス
     """
     def __init__(self):
         super().__init__()
+        self.occupation = [{'height': 0, 'width': 0}] # 0: dummy
         self.r = 0
 
 class Leaf_plus(Leaf):
     """
-    l+を扱うクラス
+    L+を扱うクラス
     """
     dir = 1
 
     def show(self):
-        return "l+"
+        return "L+"
 
 class Leaf_minus(Leaf):
     """
-    l-を扱うクラス
+    L-を扱うクラス
     """
     dir = -1
 
     def show(self):
-        return "l-"
+        return "L-"
+
+class S(Node):
+    """
+    s+,s-の抽象クラス
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.r = 0
+        self.occupation = [{'height': 0, 'width': 0}] # 0: dummy
+
+    def draw(self, center=(0, 0)):
+        self.canvas.draw_point(center)
+
+class S_plus(S):
+    """
+    s+を扱うクラス
+    """
+    dir = 1
+
+    def show(self):
+        return "S+"
+
+class S_minus(S):
+    """
+    s-を扱うクラス
+    """
+    dir = -1
+
+    def show(self):
+        return "S-"
 
 class B_Evc(Node):
     """
@@ -424,6 +501,13 @@ class B_plus_plus(B_Evc):
     """
     dir = 1                     # + 反時計回り
 
+    def __init__(self, *args):
+        if len(args) == 0:
+            head, tail = S_plus(), S_plus()
+        elif len(args) == 2:
+            head, tail = args
+        super().__init__(head, tail)
+
     def show(self):
         return "b++("+self.head.show()+","+self.tail.show()+")"
 
@@ -432,6 +516,13 @@ class B_minus_minus(B_Evc):
     b--を扱うクラス
     """
     dir = -1                    # - 時計回り
+
+    def __init__(self, *args):
+        if len(args) == 0:
+            head, tail = S_minus(), S_minus()
+        elif len(args) == 2:
+            head, tail = args
+        super().__init__(head, tail)
 
     def show(self):
         return "b--("+self.head.show()+","+self.tail.show()+")"
@@ -444,10 +535,10 @@ class B_Flip(Node):
 
     def __init__(self, head, tail):
         super().__init__()
-        self.head = head
-        self.tail = tail
-        self.r_up = head.r  # 上の図の占有領域(半径)
-        self.r_lw = tail.r  # 下の図の占有領域(半径)
+        self.head = tail
+        self.tail = head
+        self.r_up = tail.r  # 上の図の占有領域(半径)
+        self.r_lw = head.r  # 下の図の占有領域(半径)
         self.r = (2 * self.r_up + 2 * self.r_lw + 4 * B_Flip.margin) / 2
 
     def draw(self, center=(0, 0)):  # 描画する際に親から与える中心点
@@ -459,14 +550,21 @@ class B_Flip(Node):
         self.tail.draw((center[0], -self.r_up-B_Flip.margin+center[1]))
 
     def plot_arrow(self, center):
-        self.canvas.draw_arrow((center[0], self.r_lw+B_Flip.margin+center[1]-self.r_up-B_Flip.margin), theta=self.dir2rad())
-        self.canvas.draw_arrow((center[0], center[1]-(self.r_up+self.r_lw+2*B_Flip.margin)), theta=math.pi-self.dir2rad())
+        self.canvas.draw_arrow((center[0], self.r_lw+B_Flip.margin+center[1]-self.r_up-B_Flip.margin), theta=self.dir2rightleft())
+        self.canvas.draw_arrow((center[0], center[1]-(self.r_up+self.r_lw+2*B_Flip.margin)), theta=self.dir2leftright())
 
 class B_plus_minus(B_Flip):
     """
     b+-を扱うクラス
     """
     dir = 1                     # + 反時計回り
+
+    def __init__(self, *args):
+        if len(args) == 0:
+            head, tail = S_plus(), S_minus()
+        elif len(args) == 2:
+            head, tail = args
+        super().__init__(head, tail)
 
     def show(self):
         return "b+-("+self.head.show()+","+self.tail.show()+")"
@@ -476,6 +574,14 @@ class B_minus_plus(B_Flip):
     b-+を扱うクラス
     """
     dir = -1                    # - 時計回り
+
+    def __init__(self, *args):
+        if len(args) == 0:
+            head, tail = S_minus(), S_plus()
+        elif len(args) == 2:
+            head, tail = args
+        super().__init__(head, tail)
+
     def plot_arrow(self, center):
         self.canvas.draw_arrow((center[0], self.r_lw+B_Flip.margin+center[1]-self.r_up-B_Flip.margin), theta=0)
         self.canvas.draw_arrow((center[0], center[1]-(self.r_up+self.r_lw+2*B_Flip.margin)), theta=math.pi)
@@ -492,20 +598,20 @@ class Beta(Node):
     def __init__(self, head):
         super().__init__(head)
         high_children = c_list_highest(head.occupation)
-        children_length = c_list_circ_length(head.occupation, Beta.margin)
+        children_length = c_list_circ_length(head.occupation, Beta.margin) + (2 if len(head.occupation)==1 else 0)
         self.center_r = children_length / (2 * math.pi)  # betaの円
         if children_length < 1:
             self.center_r = 7 / (2 * math.pi)
         self.r = self.center_r + high_children  # 親に渡す全体の大きさ
 
-    def draw(self, center):
+    def draw(self, center=(0, 0)):
         self.canvas.draw_circle(self.center_r, center, circle_fill=True)
         for_children = make_list_for_c(self.head.occupation, self.center_r, center, False, Beta.margin)
         self.plot_arrow(center)
         self.head.draw(for_children)
 
     def plot_arrow(self, center):
-        self.canvas.draw_arrow((center[0]+self.center_r, center[1]), math.pi*0.5+self.dir2rad())
+        self.canvas.draw_arrow((center[0]+self.center_r, center[1]), self.dir2updown())
 
 class Beta_plus(Beta):
     """
@@ -514,7 +620,7 @@ class Beta_plus(Beta):
     dir = 1                     # + 反時計回り
 
     def show(self):
-        return "B+("+self.head.show()+")"
+        return "B+{"+self.head.show()+"}"
 
 class Beta_minus(Beta):
     """
@@ -523,7 +629,7 @@ class Beta_minus(Beta):
     dir = -1                     # + 反時計回り
 
     def show(self):
-        return "B-("+self.head.show()+")"
+        return "B-{"+self.head.show()+"}"
 
 class C(Node):
     """
@@ -581,13 +687,20 @@ class C(Node):
         self.tail.draw(for_children)
 
     def plot_arrow(self, bool_b0, high_point, high_theta):
-        self.canvas.draw_arrow(high_point, high_theta + math.pi*(1.5 if bool_b0 else 0.5)+self.dir2rad())
+        self.canvas.draw_arrow(high_point, high_theta + self.dir2updown())
 
 class C_plus(C):
     """
     c+を扱うクラス
     """
     dir = 1                     # + 反時計回り
+
+    def __init__(self, *args):
+        if len(args) == 0:
+            head, tail = S_plus(), Leaf_minus()
+        elif len(args) == 2:
+            head, tail = args
+        super().__init__(head, tail)
 
     def show(self):
         return "c+("+self.head.show()+","+self.tail.show()+")"
@@ -597,6 +710,13 @@ class C_minus(C):
     c-を扱うクラス
     """
     dir = -1                    # - 時計回り
+
+    def __init__(self, *args):
+        if len(args) == 0:
+            head, tail = S_minus(), Leaf_plus()
+        elif len(args) == 2:
+            head, tail = args
+        super().__init__(head, tail)
 
     def show(self):
         return "c-("+self.head.show()+","+self.tail.show()+")"

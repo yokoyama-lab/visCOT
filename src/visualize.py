@@ -42,6 +42,7 @@ def main():
     else:
         object = yacc.parser.parse(input())
         object.set_canvas(canvas)
+        print(object.show())
         object.draw()
         if args.output is None:
             canvas.show_canvas()
