@@ -32,5 +32,5 @@ pip3 install PLY
 ## 実行例
 プログラムを起動し，木表現を入力する．
 ```
-echo "a0(a2(c+(l+,).c+(l+,),c-(l-,).c-(l-,)))" | python3 visualize.py
+echo "a0(a+(s+).a-(s-).a2(c+(s+,L-),L-))" | python3 visualize.py
 ```
