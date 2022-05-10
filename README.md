@@ -13,7 +13,7 @@
 ## Linux Ubuntuにてインストール例
 + 本プログラムをダウンロード
 ```
-git clone https://github.com/yokoyama-lab/Visualization-program-of-flow.git
+git clone https://github.com/yokoyama-lab/visCOT.git
 ```
 
 + Python をインストール
@@ -32,5 +32,6 @@ pip3 install PLY
 ## 実行例
 プログラムを起動し，木表現を入力する．
 ```
+cd visCOT/src
 echo "a0(a+(s+).a-(s-).a2(c+(s+,L-),L-))" | python3 visualize.py
 ```
