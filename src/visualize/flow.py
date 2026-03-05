@@ -88,7 +88,7 @@ class Canvas:
         matplotlibのデータ削除
         """
         plt.close("all")
-        plt.cla()
+        self.ax = plt.axes()
         plt.axis('off')
         self.ax.set_aspect('equal')
 
@@ -476,9 +476,6 @@ class B_minus_plus(B_Flip):
     b-+を扱うクラス
     """
     dir = -1                    # - 時計回り
-    def plot_arrow(self, center):
-        self.canvas.draw_arrow((center[0], self.r_lw+B_Flip.margin+center[1]-self.r_up-B_Flip.margin), theta=0)
-        self.canvas.draw_arrow((center[0], center[1]-(self.r_up+self.r_lw+2*B_Flip.margin)), theta=math.pi)
 
     def show(self):
         return "b-+("+self.head.show()+","+self.tail.show()+")"
@@ -514,16 +511,16 @@ class Beta_plus(Beta):
     dir = 1                     # + 反時計回り
 
     def show(self):
-        return "B+("+self.head.show()+")"
+        return "B+{"+self.head.show()+"}"
 
 class Beta_minus(Beta):
     """
     beta-を扱うクラス
     """
-    dir = -1                     # + 反時計回り
+    dir = -1                     # - 時計回り
 
     def show(self):
-        return "B-("+self.head.show()+")"
+        return "B-{"+self.head.show()+"}"
 
 class C(Node):
     """

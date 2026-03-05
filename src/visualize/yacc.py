@@ -13,7 +13,6 @@ def p_s(p):
      if p[1] == 'a0': p[0] = flow.A0(p[3])
      elif p[1] == 'B0+':
           p[0] = flow.B0_plus(p[3], p[5])
-          print(p[0].show())
      elif p[1] == 'B0-': p[0] = flow.B0_minus(p[3], p[5])
      elif p[1] == '(': p[0] = p[2]
 
@@ -99,7 +98,7 @@ def p_cs_minus(p):
 
 def p_cs_minus1(p):
      '''cs_minus1 : c_minus
-                  | c_minus '.' cs_minus '''
+                  | c_minus '.' cs_minus1 '''
      if len(p) == 2: p[0] = flow.Cons(p[1], flow.Nil())
      elif p[2] == '.': p[0] = flow.Cons(p[1], p[3])
 
