@@ -1,5 +1,12 @@
 __pycache__
 parser.out
-parsetab.py 
+parsetab.py
 flow_picture
 .vscode
+.coverage
+*.egg-info/
+test_output/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.venv/
