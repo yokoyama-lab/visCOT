@@ -28,7 +28,7 @@ def main() -> None:
         "-i", "--interactive", help="interactive mode", action="store_true"
     )
     arg_parser.add_argument(
-        "-o", "--output", help="specify an output file (.png, .pdf, .svg)."
+        "-o", "--output", help="specify an output file (.png, .pdf, .svg, .eps)."
     )
     arg_parser.add_argument(
         "-f", "--file",

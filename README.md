@@ -1,7 +1,7 @@
 # visCOT: visualizing the tree representations of structurally stable incompressible flows in two dimensional multiply-connected domains
 
 このプログラムは2次元多重連結領域内における構造安定な非圧縮流れの木表現の入力に対して，同一のトポロジーを表す2次元上の図を作図するものです．
-想定されている入力は，Consで繋がれた木を同一の高さとして見た場合の，深さが3までの木です．
+想定されている入力は，Consで繋がれた木を同一の高さとして見た場合のCOT木表現です．深さに制限はなく，再帰的に任意の深さの木を可視化できます．
 
 ## Requirements
 + Python3 (>= 3.10)
@@ -36,6 +36,14 @@ echo "A0(a2(c+(l+,).c+(l+,),c-(l-,).c-(l-,)))" | viscot
 
 ```
 echo "A0(a2(c+(l+,).c+(l+,),c-(l-,).c-(l-,)))" | viscot -o output.png
+```
+
+ベクター形式（SVG, PDF, EPS）で出力する場合:
+
+```
+echo "A0(a2(c+(l+,).c+(l+,),c-(l-,).c-(l-,)))" | viscot -o output.svg
+echo "A0(a2(c+(l+,).c+(l+,),c-(l-,).c-(l-,)))" | viscot -o output.pdf
+echo "A0(a2(c+(l+,).c+(l+,),c-(l-,).c-(l-,)))" | viscot -o output.eps
 ```
 
 対話モードで起動する場合:
