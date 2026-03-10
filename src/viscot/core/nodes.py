@@ -397,6 +397,7 @@ class A2(Node):
         self._cv.draw_arrow(((self.r + edge) / 2, cy), 0)
         for_plus_children = make_list_for_c(
             self.head.occupation, self.center_r, center, False, cfg.a2_margin,
+            parent_length=self.len_of_circ / 2,
             config=cfg,
         )
         for_minus_children = make_list_for_c(
@@ -405,7 +406,6 @@ class A2(Node):
             center,
             False,
             cfg.a2_margin,
-            parent_length=self.len_of_circ / 2,
             config=cfg,
         )
         self.head.draw(for_plus_children)
@@ -763,12 +763,12 @@ class C(Node):
 class C_plus(C):
     """c+ node."""
 
-    dir = 1
+    dir = -1
     _show_prefix = "c+"
 
 
 class C_minus(C):
     """c- node."""
 
-    dir = -1
+    dir = 1
     _show_prefix = "c-"
