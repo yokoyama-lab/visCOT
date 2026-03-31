@@ -90,10 +90,14 @@ def make_list_for_c(
     result: list[DrawContext] = []
     length = parent_length
     if parent_type and first_child:
-        # B0 の最初の子は親円周上で少しオフセットして配置開始
-        length += config.b0_first_child_offset
-        share = margin / len(children)  # circumference / n_children
-        for _ in children:
+        # B0: distribute children evenly around the full circumference.
+        # Each child occupies its width; the remaining arc is split as gaps.
+        n = len(children)
+        total_width = sum(c.width for c in children)
+        total_gap = margin - total_width  # remaining arc after subtracting widths
+        gap = max(total_gap / n, config.b0_first_child_offset) if n > 0 else 0
+        for child in children:
+            length += gap / 2  # half-gap before
             result.append(
                 DrawContext(
                     length=length,
@@ -102,8 +106,7 @@ def make_list_for_c(
                     parent_type=parent_type,
                 )
             )
-            # Advance by share to distribute children evenly around the circle
-            length += share
+            length += child.width + gap / 2  # width + half-gap after
     else:
         for child in children:
             length += margin
@@ -256,9 +259,16 @@ class B0(Node):
         super().__init__(head, tail)
         cfg = self._config
         high_children = c_list_highest(tail.occupation)
-        children_length = c_list_circ_length(tail.occupation, cfg.b0_margin)
+        # For B0, children are drawn inward so widest*2 rule is unnecessary.
+        # Use the sum of widths + margins directly, giving a tighter circle.
+        children_length = sum(c.width + cfg.b0_margin for c in tail.occupation)
+        # Ensure the inner radius (R - high_children) stays above a minimum
+        # so that inward-pointing C-splines don't converge and cross.
+        min_inner = max(head.r + cfg.b0_margin, cfg.b0_min_inner_radius)
         self.r = max(
-            children_length / (2 * math.pi), head.r + high_children + cfg.b0_margin
+            children_length / (2 * math.pi),
+            head.r + high_children + cfg.b0_margin,
+            high_children + min_inner,
         )
 
     def draw(self, *args: Any, **kwargs: Any) -> None:
@@ -378,7 +388,7 @@ class A2(Node):
             c_list_circ_length(tail.occupation, margin) + margin
         )
         self.len_of_circ = max(len_of_plus_circ, len_of_minus_circ) * 2
-        self.center_r: float = self.len_of_circ / (2 * math.pi)
+        self.center_r: float = max(self.len_of_circ / (2 * math.pi), 1.0)
         self.r: float = self.center_r + self.high
         self.occupation: list[OccupationInfo] = [OccupationInfo(height=self.r, width=0)]
 
@@ -671,16 +681,32 @@ class C(Node):
         cfg = self._config
         self.high_children: float = c_list_highest(tail.occupation)
         self.children_length: float = c_list_circ_length(tail.occupation, cfg.c_margin)
-        self.high: float = 2 * head.r + self.high_children + cfg.c_margin
+        # b_offset: how far the head b-node is placed from the parent circle.
+        # high must exceed b_offset + head.r + margin so that the spline apex
+        # clears the head obstacle circle entirely.
+        b_offset = max(
+            self.high_children + cfg.c_circ_margin + head.r,
+            head.r * 2 + cfg.c_circ_margin * 2,
+        )
+        self.high: float = max(
+            2 * head.r + self.high_children + cfg.c_margin,
+            b_offset + head.r + cfg.c_circ_margin,
+        )
         if self.head.r == 0 and len(self.tail.occupation) != 1:
             self.high += len(self.tail.occupation)
         # Effective arc-length extent: at least children_length, but wider for
         # tall splines to prevent crossing with adjacent C-node splines.
+        # min_extent ensures enough room for child-start offset on both sides.
+        min_extent = self.children_length + 2 * self.high * cfg.c_child_start_offset
         self.effective_extent: float = max(
             self.children_length,
             self.high * cfg.c_height_spacing_factor,
+            min_extent,
         )
-        bottom_length = max(head.r * 2, self.effective_extent)
+        # Add spline clearance: taller splines need wider angular allocation
+        # to prevent their curves from crossing neighbouring splines.
+        spline_clearance = self.high * cfg.c_spline_clearance_factor
+        bottom_length = max(head.r * 2, self.effective_extent + spline_clearance)
         self.occupation: list[OccupationInfo] = [
             OccupationInfo(height=self.high, width=bottom_length)
         ]
@@ -704,40 +730,87 @@ class C(Node):
         high_theta = (end_theta - start_theta) / 2 + start_theta
         sign = -1 if bool_b0 else 1
         high_point = theta_point(high_theta, center_r + sign * self.high, center)
+        # Place head b-node far enough from the parent circle so it doesn't
+        # overlap with the filled region.  Minimum clearance = head.r + margin.
+        b_offset = max(
+            high_children + cfg.c_circ_margin + self.head.r,
+            self.head.r * 2 + cfg.c_circ_margin * 2,
+        )
         b_center = theta_point(
             high_theta,
-            center_r + sign * (high_children + cfg.c_circ_margin + self.head.r),
+            center_r + sign * b_offset,
             center,
         )
         self.plot_arrow(high_point, high_theta)
+
+        # Build spline control points.
+        # For outward splines (non-B0 parent), insert guide points just
+        # outside the parent circle to prevent dipping into filled regions.
+        # For inward splines (B0 parent), guides are not needed.
+        use_guides = not bool_b0
+        if use_guides:
+            nudge_frac = 0.12
+            nudge_r = center_r + sign * self.high * nudge_frac
+            guide_start = theta_point(
+                start_theta + (high_theta - start_theta) * nudge_frac,
+                nudge_r, center,
+            )
+            guide_end = theta_point(
+                end_theta - (end_theta - high_theta) * nudge_frac,
+                nudge_r, center,
+            )
+
         if self.head.r != 0:
             b_r_theta = math.pi - (math.pi / 2 + high_theta)
-            b_r_center = theta_point(
-                -b_r_theta, self.head.r + cfg.c_circ_margin, b_center
-            )
-            b_l_center = theta_point(
-                math.pi - b_r_theta, self.head.r + cfg.c_circ_margin, b_center
-            )
-            if self.head.r * 2 < self.children_length / 2:
+            if use_guides:
+                # Outward (non-B0): wider bypass to clear the head obstacle
+                bypass_r = self.head.r * 2 + cfg.c_circ_margin
+                b_r_center = theta_point(-b_r_theta, bypass_r, b_center)
+                b_l_center = theta_point(math.pi - b_r_theta, bypass_r, b_center)
                 self._cv.draw_spline(
-                    [start_point, high_point, end_point]
+                    [start_point, guide_start, b_r_center, high_point,
+                     b_l_center, guide_end, end_point]
                 )
+            elif self.head.r * 2 < self.children_length / 2:
+                # B0 inward, small head: 3-point spline
+                self._cv.draw_spline([start_point, high_point, end_point])
             else:
+                # B0 inward, large head: 5-point bypass
+                bypass_r = self.head.r + cfg.c_circ_margin
+                b_r_center = theta_point(-b_r_theta, bypass_r, b_center)
+                b_l_center = theta_point(math.pi - b_r_theta, bypass_r, b_center)
                 self._cv.draw_spline(
                     [start_point, b_r_center, high_point, b_l_center, end_point]
                 )
         else:
-            self._cv.draw_spline([start_point, high_point, end_point])
+            if use_guides:
+                self._cv.draw_spline(
+                    [start_point, guide_start, high_point, guide_end, end_point]
+                )
+            else:
+                self._cv.draw_spline([start_point, high_point, end_point])
         self._cv.draw_point(start_point)
         self._cv.draw_point(end_point)
-        # Center sub-children within the (possibly wider) effective extent
-        padding = (self.effective_extent - self.children_length) / 2
+        # Center sub-children within the (possibly wider) effective extent.
+        # Enforce a minimum padding so that the first child C's start_point
+        # is far enough from this C's start_point to avoid crossing.
+        raw_padding = (self.effective_extent - self.children_length) / 2
+        min_padding = self.high * cfg.c_child_start_offset
+        padding = max(raw_padding, min_padding)
+        # Adaptive margin: taller children need more spacing to avoid crossings
+        base_margin = cfg.c_margin / 1.5
+        if self.tail.occupation and self.tail.occupation != [_ZERO_OCCUPATION]:
+            tallest_child = c_list_highest(self.tail.occupation)
+            height_bonus = tallest_child * cfg.c_spline_clearance_factor / max(center_r, 1.0)
+            adaptive_margin = base_margin + height_bonus
+        else:
+            adaptive_margin = base_margin
         for_children = make_list_for_c(
             self.tail.occupation,
             center_r,
             center,
             bool_b0,
-            cfg.c_margin / 1.5,
+            adaptive_margin,
             parent_length=length + padding,
             config=cfg,
         )

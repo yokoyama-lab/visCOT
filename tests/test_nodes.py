@@ -171,8 +171,9 @@ class TestConfigPropagation:
 
     def test_parse_with_config_affects_b0(self) -> None:
         """B0 radius should change with b0_margin config."""
-        r_default = parse("B0+(l+,)").r
-        r_big = parse("B0+(l+,)", config=LayoutConfig(b0_margin=2.0)).r
+        expr = "B0+(l+,c-(l-,).c-(l-,))"
+        r_default = parse(expr).r
+        r_big = parse(expr, config=LayoutConfig(b0_margin=5.0)).r
         assert r_big > r_default
 
     def test_c_height_spacing_factor_widens_c_node(self) -> None:

@@ -123,3 +123,130 @@ class TestFullRendering:
     def test_render_expression(self, render, expr: str) -> None:
         tree, canvas = render(expr)
         assert len(canvas.drawn_elements) > 0
+
+
+_conftest = __import__("conftest")
+_ALL_EXHAUSTIVE = (
+    _conftest.EXHAUSTIVE_1_2_3
+    + _conftest.EXHAUSTIVE_4
+    + _conftest.EXHAUSTIVE_5
+)
+
+
+class TestExhaustive:
+    """All valid COT expressions with 1-5 nodes — zero crossings."""
+
+    @pytest.mark.parametrize("expr", _ALL_EXHAUSTIVE)
+    def test_exhaustive_no_crossings(self, render, expr: str) -> None:
+        from viscot.metrics.overlap import compute_overlap
+
+        _tree, canvas = render(expr)
+        result = compute_overlap(canvas.drawn_elements, spline_only=True)
+        assert result.crossing_count == 0, (
+            f"{expr!r} produced {result.crossing_count} crossing(s)"
+        )
+
+    @pytest.mark.parametrize("expr", _ALL_EXHAUSTIVE)
+    def test_exhaustive_roundtrip(self, render, expr: str) -> None:
+        from viscot.core.parser import parse as cot_parse
+
+        tree, _canvas = render(expr)
+        shown = tree.show()
+        assert cot_parse(shown).show() == shown
+
+
+class TestNoSplineCrossings:
+    """Verify that rendered COT expressions have no spurious spline crossings.
+
+    A correct visualization should produce streamlines (splines) that do
+    not cross each other.  Structural crossings between circles and lines
+    are expected (e.g. a separatrix touching a boundary), so we use
+    ``spline_only=True`` to restrict the check to spline-vs-spline
+    intersections.
+    """
+
+    @pytest.mark.parametrize("expr", MAKEFILE_EXPRESSIONS)
+    def test_no_spline_crossings(self, render, expr: str) -> None:
+        from viscot.metrics.overlap import compute_overlap
+
+        _tree, canvas = render(expr)
+        result = compute_overlap(canvas.drawn_elements, spline_only=True)
+        assert result.crossing_count == 0, (
+            f"Expression {expr!r} produced {result.crossing_count} "
+            f"spline crossing(s)"
+        )
+
+
+class TestSmallCrossings:
+    """Track the smallest known expressions that produce spline crossings.
+
+    These are regression baselines: layout improvements should reduce
+    the crossing counts, never increase them.
+    """
+
+    @pytest.mark.parametrize("label,expr", [
+        pytest.param(k, v, id=k) for k, v in __import__("conftest").CROSSING_EXPRS.items()
+    ])
+    def test_crossing_expr_renders(self, render, label: str, expr: str) -> None:
+        """Each crossing expression must parse, draw, and round-trip."""
+        from viscot.core.parser import parse as cot_parse
+
+        tree, canvas = render(expr)
+        assert len(canvas.drawn_elements) > 0
+        shown = tree.show()
+        assert cot_parse(shown).show() == shown
+
+    @pytest.mark.parametrize("label,expr,max_crossings", [
+        ("20node", __import__("conftest").CROSSING_EXPRS["20node"], 0),
+        ("22node", __import__("conftest").CROSSING_EXPRS["22node"], 0),
+        ("24node", __import__("conftest").CROSSING_EXPRS["24node"], 0),
+    ])
+    def test_crossing_baseline(self, render, label: str, expr: str, max_crossings: int) -> None:
+        """Crossing count must not regress beyond the recorded baseline."""
+        from viscot.metrics.overlap import compute_overlap
+
+        _tree, canvas = render(expr)
+        ov = compute_overlap(canvas.drawn_elements, spline_only=True)
+        assert ov.crossing_count <= max_crossings, (
+            f"{label}: {ov.crossing_count} crossings (max allowed: {max_crossings})"
+        )
+
+
+class TestStress:
+    """Stress tests with large COT expressions."""
+
+    def test_102_node_renders(self, render) -> None:
+        """102-node expression must parse, draw, and round-trip."""
+        from conftest import STRESS_EXPR_102
+        from viscot.core.parser import parse as cot_parse
+
+        tree, canvas = render(STRESS_EXPR_102)
+        assert len(canvas.drawn_elements) > 100
+        # Round-trip
+        shown = tree.show()
+        tree2 = cot_parse(shown)
+        assert tree2.show() == shown
+
+    def test_102_node_metrics(self, render) -> None:
+        """102-node expression: record crossing count as regression baseline.
+
+        Current layout produces 34 spline crossings at 102 nodes.
+        This test documents the baseline and will detect regressions
+        (more crossings) or improvements (fewer crossings).
+        """
+        from conftest import STRESS_EXPR_102
+        from viscot.metrics.overlap import compute_overlap
+        from viscot.metrics.composite import compute_composite_score
+
+        _tree, canvas = render(STRESS_EXPR_102)
+        overlap = compute_overlap(canvas.drawn_elements, spline_only=True)
+        score = compute_composite_score(canvas.drawn_elements)
+
+        # Baseline: 0 crossings at 102 nodes (improved from 34→13→3→0).
+        # Fail if any crossings appear (regression).
+        assert overlap.crossing_count == 0, (
+            f"Regression: 102-node stress test produced {overlap.crossing_count} "
+            f"crossings (expected: 0)"
+        )
+        # Score should be finite
+        assert score.score > -1e9

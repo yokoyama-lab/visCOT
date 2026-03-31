@@ -25,6 +25,7 @@ class DrawnCircle:
 @dataclass
 class DrawnSpline:
     points: np.ndarray  # (N, 2)
+    line: object = None  # matplotlib Line2D reference for updating
 
 
 @dataclass
@@ -65,13 +66,24 @@ class Canvas:
     def drawn_elements(self) -> list[DrawnElement]:
         return self._drawn_elements
 
+    def save_canvas(self, file_name: str, dpi: int = 150) -> None:
+        self._fit_figure()
+        self.fig.savefig(file_name, dpi=dpi, bbox_inches="tight")
+
     def show_canvas(self) -> None:
-        self.fig.tight_layout()
+        self._fit_figure()
         plt.show()
 
-    def save_canvas(self, file_name: str, dpi: int = 150) -> None:
-        self.fig.tight_layout()
-        self.fig.savefig(file_name, dpi=dpi)
+    def _fit_figure(self) -> None:
+        """Resize the figure so that 1 data-unit ≈ 0.15 inches."""
+        xlim = self.ax.get_xlim()
+        ylim = self.ax.get_ylim()
+        data_w = xlim[1] - xlim[0]
+        data_h = ylim[1] - ylim[0]
+        scale = 0.15  # inches per data-unit
+        w = max(data_w * scale, 4.0)
+        h = max(data_h * scale, 3.0)
+        self.fig.set_size_inches(w, h)
 
     def close(self) -> None:
         """Close the figure without re-creating. Use for final cleanup."""
@@ -83,6 +95,61 @@ class Canvas:
 
     def __exit__(self, *args: object) -> None:
         self.close()
+
+    def avoid_obstacles(self, margin: float = 0.5) -> None:
+        """Push spline points outside filled obstacle circles.
+
+        For each spline point that falls inside a filled circle,
+        project it radially outward to the circle boundary + margin.
+        Then update the matplotlib Line2D to reflect the correction.
+
+        The largest filled circle (B0's white background) is excluded
+        because it is not an obstacle — C splines are meant to be inside it.
+        """
+        filled = [
+            e for e in self._drawn_elements
+            if isinstance(e, DrawnCircle) and e.filled
+        ]
+        if not filled:
+            return
+        # Exclude B0's white background circle (always centered at origin)
+        obstacles = [
+            (e.center, e.radius)
+            for e in filled
+            if not (abs(e.center[0]) < 0.01 and abs(e.center[1]) < 0.01)
+        ]
+        if not obstacles:
+            return
+        for elem in self._drawn_elements:
+            if not isinstance(elem, DrawnSpline):
+                continue
+            pts = elem.points
+            n_pts = len(pts)
+            modified = False
+            for (cx, cy), r in obstacles:
+                dx = pts[:, 0] - cx
+                dy = pts[:, 1] - cy
+                dists = np.sqrt(dx**2 + dy**2)
+                target = r + margin
+                mask = dists < target
+                # Protect start and end points — they are anchored
+                # on the parent circle and must not be moved.
+                mask[0] = False
+                mask[n_pts - 1] = False
+                if not mask.any():
+                    continue
+                for i in np.where(mask)[0]:
+                    d = dists[i]
+                    if d < 1e-10:
+                        pts[i, 0] = cx + target
+                        continue
+                    pts[i, 0] = cx + dx[i] * target / d
+                    pts[i, 1] = cy + dy[i] * target / d
+                modified = True
+            if modified and elem.line is not None:
+                elem.line.remove()
+                new_lines = self.ax.plot(pts[:, 0], pts[:, 1], color="black")
+                elem.line = new_lines[0]
 
     def clear_canvas(self) -> None:
         """Reset the canvas for reuse, clearing all drawn elements."""
@@ -114,9 +181,9 @@ class Canvas:
             num_points,
             min(len(xy), 4) - 1,
         )
-        self.ax.plot(a, b, color="black")
+        lines = self.ax.plot(a, b, color="black")
         pts = np.column_stack([a, b])
-        self._drawn_elements.append(DrawnSpline(points=pts))
+        self._drawn_elements.append(DrawnSpline(points=pts, line=lines[0]))
 
     def draw_circle(
         self,

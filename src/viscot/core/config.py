@@ -34,11 +34,14 @@ class LayoutConfig:
     # C (c+, c-)
     c_margin: float = 1.0
     c_circ_margin: float = 0.5
-    c_height_spacing_factor: float = 0.5  # extra arc-length per unit height
+    c_height_spacing_factor: float = 3.0  # extra arc-length per unit height
     c_min_child_height: float = 0.3  # fallback height when C has no children
+    c_spline_clearance_factor: float = 1.0  # additional width per unit height to prevent crossings
+    c_child_start_offset: float = 1.5  # min padding (× height) to separate child C from parent C start
 
     # B0 first-child offset
     b0_first_child_offset: float = 0.3
+    b0_min_inner_radius: float = 2.0  # minimum radius after subtracting child height
 
     # Spline interpolation points
     spline_num_points: int = 100

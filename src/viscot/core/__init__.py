@@ -50,6 +50,7 @@ def render_expression(expression: str, config: LayoutConfig | None = None) -> Ca
     tree = parse(expression, config=config)
     tree.set_canvas(canvas)
     tree.draw()
+    canvas.avoid_obstacles()
     return canvas
 
 
