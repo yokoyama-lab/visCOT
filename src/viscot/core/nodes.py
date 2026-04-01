@@ -741,7 +741,7 @@ class C(Node):
             center_r + sign * b_offset,
             center,
         )
-        self.plot_arrow(high_point, high_theta)
+        self.plot_arrow(high_point, high_theta, bool_b0=bool_b0)
 
         # Build spline control points.
         # For outward splines (non-B0 parent), insert guide points just
@@ -821,12 +821,17 @@ class C(Node):
         self,
         high_point: tuple[float, float] = (0, 0),
         high_theta: float = 0,
+        bool_b0: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> None:
+        theta = high_theta + math.pi * 0.5 + self.dir2rad()
+        if bool_b0:
+            # Reverse direction only for B0-parented C curves
+            theta += math.pi
         self._cv.draw_arrow(
             high_point,
-            high_theta + math.pi * 0.5 + self.dir2rad(),
+            theta,
         )
 
     def show(self) -> str:
