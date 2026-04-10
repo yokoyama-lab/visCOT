@@ -11,9 +11,9 @@
 |:---:|:---:|:---:|
 | ![一様流](examples/example_uniform.png) | ![閉軌道](examples/example_closed_orbit.png) | ![2つの閉軌道](examples/example_two_orbits.png) |
 
-| 鞍点結合 `B0+(l+,c-(l-,).c-(l-,))` | 3つの鞍点結合 | 多重連結領域（障害物） |
+| 鞍点結合 `B0+(l+,c-(l-,).c-(l-,))` | 3つの鞍点結合 | 障害物を含む流れ `A0(a+(b++(B+{},B+{})))` |
 |:---:|:---:|:---:|
-| ![鞍点結合](examples/example_saddle.png) | ![3つの鞍点結合](examples/example_three_saddle.png) | ![多重連結](examples/example_complex_multiply.png) |
+| ![鞍点結合](examples/example_saddle.png) | ![3つの鞍点結合](examples/example_three_saddle.png) | ![障害物を含む流れ](examples/example_complex_multiply.png) |
 
 <details>
 <summary>さらに複雑な例</summary>
