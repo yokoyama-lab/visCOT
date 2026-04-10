@@ -15,18 +15,6 @@
 |:---:|:---:|:---:|
 | ![鞍点結合](examples/example_saddle.png) | ![3つの鞍点結合](examples/example_three_saddle.png) | ![障害物を含む流れ](examples/example_complex_multiply.png) |
 
-<details>
-<summary>さらに複雑な例</summary>
-
-| 入れ子の二分岐・障害物・鞍点結合 |
-|:---:|
-| ![複雑な例](examples/example_complex_nested.png) |
-
-**COT式:** `B0-(b-+(b-+(l-,b++(l+,l+)),B+{}),c+(B+{},).c+(l+,).c+(b+-(l+,l-),).c+(l+,))`
-
-入れ子の二分岐ノード、複数の障害物（内側境界成分）、連続する鞍点結合を含む複雑な流れ場も正確に可視化できます。
-
-</details>
 
 ## 特徴
 
