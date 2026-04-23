@@ -744,26 +744,40 @@ class C(Node):
         self.plot_arrow(high_point, high_theta, bool_b0=bool_b0)
 
         # Build spline control points.
-        # For outward splines (non-B0 parent), insert guide points just
-        # outside the parent circle to prevent dipping into filled regions.
-        # For inward splines (B0 parent), guides are not needed.
-        use_guides = not bool_b0
-        if use_guides:
-            nudge_frac = 0.12
-            nudge_r = center_r + sign * self.high * nudge_frac
-            guide_start = theta_point(
-                start_theta + (high_theta - start_theta) * nudge_frac,
-                nudge_r, center,
-            )
-            guide_end = theta_point(
-                end_theta - (end_theta - high_theta) * nudge_frac,
-                nudge_r, center,
-            )
+        # Guide points near the start/end constrain the cubic spline so it
+        # stays on the intended side of the parent circle instead of
+        # overshooting and bending back near the boundary.
+        nudge_frac = 0.12
+        nudge_r = center_r + sign * self.high * nudge_frac
+        guide_start = theta_point(
+            start_theta + (high_theta - start_theta) * nudge_frac,
+            nudge_r, center,
+        )
+        guide_end = theta_point(
+            end_theta - (end_theta - high_theta) * nudge_frac,
+            nudge_r, center,
+        )
 
         if self.head.r != 0:
             b_r_theta = math.pi - (math.pi / 2 + high_theta)
-            if use_guides:
-                # Outward (non-B0): wider bypass to clear the head obstacle
+            if bool_b0:
+                # Inward (B0): keep the bypass tight, but still add boundary
+                # guides so the curve does not bulge back into the B0 rim.
+                control_points: list[tuple[float, float]] = [
+                    start_point,
+                    guide_start,
+                ]
+                if self.head.r * 2 >= self.children_length / 2:
+                    bypass_r = self.head.r + cfg.c_circ_margin
+                    b_r_center = theta_point(-b_r_theta, bypass_r, b_center)
+                    b_l_center = theta_point(math.pi - b_r_theta, bypass_r, b_center)
+                    control_points.extend([b_r_center, high_point, b_l_center])
+                else:
+                    control_points.append(high_point)
+                control_points.extend([guide_end, end_point])
+                self._cv.draw_spline(control_points)
+            else:
+                # Outward (non-B0): wider bypass to clear the head obstacle.
                 bypass_r = self.head.r * 2 + cfg.c_circ_margin
                 b_r_center = theta_point(-b_r_theta, bypass_r, b_center)
                 b_l_center = theta_point(math.pi - b_r_theta, bypass_r, b_center)
@@ -771,24 +785,8 @@ class C(Node):
                     [start_point, guide_start, b_r_center, high_point,
                      b_l_center, guide_end, end_point]
                 )
-            elif self.head.r * 2 < self.children_length / 2:
-                # B0 inward, small head: 3-point spline
-                self._cv.draw_spline([start_point, high_point, end_point])
-            else:
-                # B0 inward, large head: 5-point bypass
-                bypass_r = self.head.r + cfg.c_circ_margin
-                b_r_center = theta_point(-b_r_theta, bypass_r, b_center)
-                b_l_center = theta_point(math.pi - b_r_theta, bypass_r, b_center)
-                self._cv.draw_spline(
-                    [start_point, b_r_center, high_point, b_l_center, end_point]
-                )
         else:
-            if use_guides:
-                self._cv.draw_spline(
-                    [start_point, guide_start, high_point, guide_end, end_point]
-                )
-            else:
-                self._cv.draw_spline([start_point, high_point, end_point])
+            self._cv.draw_spline([start_point, high_point, end_point])
         self._cv.draw_point(start_point)
         self._cv.draw_point(end_point)
         # Center sub-children within the (possibly wider) effective extent.

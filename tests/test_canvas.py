@@ -7,6 +7,7 @@ import math
 import pytest
 from conftest import MAKEFILE_EXPRESSIONS
 
+from viscot.core import render_expression
 from viscot.core.canvas import (
     Canvas,
     DrawnArrow,
@@ -123,6 +124,36 @@ class TestFullRendering:
     def test_render_expression(self, render, expr: str) -> None:
         tree, canvas = render(expr)
         assert len(canvas.drawn_elements) > 0
+
+
+class TestB0SplineContainment:
+    """B0 inward C splines should stay inside the parent boundary."""
+
+    @pytest.mark.parametrize("expr", [
+        "B0+(l+,c-(B-{},))",
+        "B0-(l-,c+(B+{},))",
+        "B0+(b+-(l+,l-),c-(B-{},).c-(l-,).c-(l-,))",
+    ])
+    def test_b0_inward_splines_do_not_escape_parent(self, expr: str) -> None:
+        canvas = render_expression(expr)
+        try:
+            b0_radius = max(
+                elem.radius
+                for elem in canvas.drawn_elements
+                if (
+                    isinstance(elem, DrawnCircle)
+                    and elem.filled
+                    and abs(elem.center[0]) < 1e-9
+                    and abs(elem.center[1]) < 1e-9
+                )
+            )
+            for elem in canvas.drawn_elements:
+                if not isinstance(elem, DrawnSpline):
+                    continue
+                dists = (elem.points[:, 0] ** 2 + elem.points[:, 1] ** 2) ** 0.5
+                assert dists[1:-1].max() <= b0_radius + 1e-3
+        finally:
+            canvas.close()
 
 
 _conftest = __import__("conftest")
